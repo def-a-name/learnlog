@@ -1,2 +1,5 @@
 # 忽略 vscode 隐藏目录
 .vscode/
+
+# 忽略 build 目录
+build/
