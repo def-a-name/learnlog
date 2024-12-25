@@ -6,7 +6,7 @@
 #include <condition_variable>
 #include <mutex>
 
-namespace mylog {
+namespace learnlog {
 namespace base {
 
 /*
@@ -174,8 +174,8 @@ private:
     std::condition_variable pop_cv_;
     std::atomic<size_t> discard_count_{0};
 
-    mylog::base::circular_queue<T> queue_;
+    learnlog::base::circular_queue<T> queue_;
 };
 
 }   // namespace base
-}   // namespace mylog
+}   // namespace learnlog

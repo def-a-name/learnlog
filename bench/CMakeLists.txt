@@ -1,9 +1,9 @@
 cmake_minimum_required(VERSION 3.11)
-project(mylog_bench CXX)
+project(learnlog_bench CXX)
 
-if(NOT TARGET mylog)
+if(NOT TARGET learnlog)
     # Stand-alone build
-    find_package(mylog REQUIRED)
+    find_package(learnlog REQUIRED)
 endif()
 
 find_package(Threads REQUIRED)

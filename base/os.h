@@ -26,7 +26,7 @@
 
 #endif
 
-namespace mylog {
+namespace learnlog {
 namespace base {
 namespace os {
 
@@ -304,4 +304,4 @@ inline bool fsync(FILE* fp) {
 
 }   // namespace os
 }   // namespace base
-}   // namespace mylog
+}   // namespace learnlog

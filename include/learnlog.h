@@ -1,7 +1,7 @@
 #pragma once
 
-// mylog 日志库的主要头文件，包含用户接口函数，用户可通过 mylog::<function> 进行调用，
-// 函数主要是对单例 registry 的封装，实现位于 mylog.cpp，
+// learnlog 日志库的主要头文件，包含用户接口函数，用户可通过 learnlog::<function> 进行调用，
+// 函数主要是对单例 registry 的封装，实现位于 learnlog.cpp，
 // 由创建 logger 时设定的名称（logger_name）对 logger 进行增删改查
 
 #include "definitions.h"
@@ -9,49 +9,49 @@
 #include "async_factory.h"
 #include "base/exception.h"
 
-namespace mylog {
+namespace learnlog {
 
 // 根据全局设置对 new_logger 进行初始化，设置项包括
 // 格式化器（formatter）、日志记录级别（log_level）、缓冲区刷新级别（flush_level），
 // 初始化完成后默认注册 logger，该步骤可由 set_auto_register_logger(false) 取消
 // example:
-//  auto sink = std::make_shared<mylog::sinks::basic_file_sink_mt>("filename");
-//  auto logger = std::make_shared<mylog::logger>("logger_name", sink);
-//  mylog::initialize_logger(logger);
+//  auto sink = std::make_shared<learnlog::sinks::basic_file_sink_mt>("filename");
+//  auto logger = std::make_shared<learnlog::logger>("logger_name", sink);
+//  learnlog::initialize_logger(logger);
 void initialize_logger(logger_shr_ptr new_logger);
 
 // 注册 new_logger，完成注册后 new_logger 可通过名称（logger_name）被访问
 void register_logger(logger_shr_ptr new_logger);
 
-// 设置 mylog::initialize_logger() 后是否自动执行 mylog::register_logger()
+// 设置 learnlog::initialize_logger() 后是否自动执行 learnlog::register_logger()
 void set_auto_register_logger(bool flag);
 
 // 通过名称（logger_name）获取 logger 对象的 shared_ptr，找不到时返回 nullptr
 // example:
-//  auto logger = mylog::get_logger("logger_name");
+//  auto logger = learnlog::get_logger("logger_name");
 logger_shr_ptr get_logger(const std::string& logger_name);
 
 // 通过名称（logger_name）移除 logger 对象，对象不存在时无操作，不抛出异常
 void remove_logger(const std::string& logger_name);
 
 // 获取默认 logger 的 shared_ptr，如果不存在则返回 nullptr，
-// 默认 logger 对象的名称（logger_name）是 ""，sink 是 mylog::sinks::stdout_color_sink_mt
+// 默认 logger 对象的名称（logger_name）是 ""，sink 是 learnlog::sinks::stdout_color_sink_mt
 // example:
-//  auto default_logger = mylog::get_default_logger();
+//  auto default_logger = learnlog::get_default_logger();
 logger_shr_ptr get_default_logger();
 
 // 设置默认 logger
 // example:
-//  auto sink = std::make_shared<mylog::sinks::basic_file_sink_mt>("filename");
-//  auto new_default_logger = std::make_shared<mylog::logger>("logger_name", sink);
-//  mylog::set_default_logger(new_default_logger);
+//  auto sink = std::make_shared<learnlog::sinks::basic_file_sink_mt>("filename");
+//  auto new_default_logger = std::make_shared<learnlog::logger>("logger_name", sink);
+//  learnlog::set_default_logger(new_default_logger);
 void set_default_logger(logger_shr_ptr new_default_logger);
 
 // 设置用于格式化日志信息的模板，该模板将应用于所有已注册的 logger，
 // 新注册的 logger 也默认使用该模板，
 // 模板转义字符的说明位于 sinks/pattern_formatter.cpp
 // example:
-//  mylog::set_global_pattern("[%c] [%^%l%$] %v");
+//  learnlog::set_global_pattern("[%c] [%^%l%$] %v");
 void set_global_pattern(std::string pattern);
 
 // 设置用于格式化日志信息的格式化器（formatter），该 formatter 将应用于所有已注册的 logger,
@@ -60,7 +60,7 @@ void set_global_formatter(formatter_uni_ptr new_formatter);
 
 // 设置指定 logger 的格式模板，模板转义字符的说明位于 sinks/pattern_formatter.cpp
 // example:
-//  mylog::set_pattern("logger_name", "[%c] [%^%l%$] %v");
+//  learnlog::set_pattern("logger_name", "[%c] [%^%l%$] %v");
 void set_pattern(const std::string& logger_name, std::string pattern);
 
 // 设置全局日志记录级别（log_level），该级别将应用于所有已注册的 logger,
@@ -68,12 +68,12 @@ void set_pattern(const std::string& logger_name, std::string pattern);
 // log_level 决定了日志被输出的最低级别，高于该级别的日志才会被输出，
 // 日志级别的定义位于 definitions.h
 // example:
-//  mylog::set_global_log_level(mylog::level::debug);
+//  learnlog::set_global_log_level(learnlog::level::debug);
 void set_global_log_level(level::level_enum log_level);
 
 // 设置指定 logger 的日志记录级别（log_level），日志级别的定义位于 definitions.h
 // example:
-//  mylog::set_log_level("logger_name", mylog::level::debug);
+//  learnlog::set_log_level("logger_name", learnlog::level::debug);
 void set_log_level(const std::string& logger_name, level::level_enum log_level);
 
 // 设置全局缓冲区刷新级别（flush_level），该级别将应用于所有已注册的 logger,
@@ -81,19 +81,19 @@ void set_log_level(const std::string& logger_name, level::level_enum log_level);
 // flush_level 控制缓冲区的强制刷新，高于该级别的日志在输出后立即刷新所在缓冲区，
 // 日志级别的定义位于 definitions.h
 // example:
-//  mylog::set_global_flush_level(mylog::level::error);
+//  learnlog::set_global_flush_level(learnlog::level::error);
 void set_global_flush_level(level::level_enum flush_level);
 
 // 设置指定 logger 的缓冲区刷新级别（flush_level），日志级别的定义位于 definitions.h
 // example:
-//  mylog::set_flush_level("logger_name", mylog::level::error);
+//  learnlog::set_flush_level("logger_name", learnlog::level::error);
 void set_flush_level(const std::string& logger_name, level::level_enum flush_level);
 
 // 对所有已注册的 logger 执行函数 func
 // example:
 //  int logger_cnt = 0;
-//  auto func = [&logger_cnt](mylog::logger_shr_ptr) { logger_cnt++; };
-//  mylog::exec_all(func);
+//  auto func = [&logger_cnt](learnlog::logger_shr_ptr) { logger_cnt++; };
+//  learnlog::exec_all(func);
 void exec_all(const std::function<void(logger_shr_ptr)>& func);
 
 // 对所有已注册的 logger 刷新输出缓冲区
@@ -113,12 +113,12 @@ void register_thread_pool(thread_pool_shr_ptr new_thread_pool);
 // 获取线程池的 shared_ptr
 thread_pool_shr_ptr get_thread_pool();
 
-// 关闭 mylog，释放单例 registry 中的所有资源，一般不需要手动调用
+// 关闭 learnlog，释放单例 registry 中的所有资源，一般不需要手动调用
 void close();
 
 // 每隔一段时间 interval，对所有已注册的 logger 刷新输出缓冲区
 // example:
-//  mylog::flush_every(std::chrono::seconds(1));
+//  learnlog::flush_every(std::chrono::seconds(1));
 template <typename Rep, typename Period>
 void flush_every(std::chrono::duration<Rep, Period> interval) {
     base::registry::instance().flush_every(interval);
@@ -127,9 +127,9 @@ void flush_every(std::chrono::duration<Rep, Period> interval) {
 // 通过 factory 创建 logger 对象，创建时需要指定 logger 使用的 sink、
 // logger 的名称以及 sink 的创建参数
 // example:
-//  mylog::create<mylog::sinks::basic_file_sink_mt>("logger_name", "filename");
+//  learnlog::create<learnlog::sinks::basic_file_sink_mt>("logger_name", "filename");
 // 等同于:
-//  mylog::basic_file_logger_mt("logger_name", "filename");
+//  learnlog::basic_file_logger_mt("logger_name", "filename");
 template <typename Sink, typename... SinkArgs>
 logger_shr_ptr create(std::string logger_name, SinkArgs &&...sink_args) {
     return sync_factory::create<Sink>(std::move(logger_name), 
@@ -155,84 +155,84 @@ void log(source_loc loc,
          level::level_enum level, 
          fmt_format_string<Args...> fmt_fstr, 
          Args &&...args) {
-    mylog::get_default_logger()->log(loc, level, fmt_fstr, std::forward<Args>(args)...);
+    learnlog::get_default_logger()->log(loc, level, fmt_fstr, std::forward<Args>(args)...);
 }
 
 template <typename... Args>
 void log(level::level_enum level, fmt_format_string<Args...> fmt_fstr, Args &&...args) {
-    mylog::get_default_logger()->log(level, fmt_fstr, std::forward<Args>(args)...);
+    learnlog::get_default_logger()->log(level, fmt_fstr, std::forward<Args>(args)...);
 }
 
 template <typename T,
               typename std::enable_if<!is_convertible_to_basic_format_string<const T &>::value,
                                       int>::type = 0>
 void log(source_loc loc, level::level_enum lvl, const T &msg) {
-    mylog::get_default_logger()->log(loc, lvl, msg);
+    learnlog::get_default_logger()->log(loc, lvl, msg);
 }
 
 template <typename T>
 void log(level::level_enum level, const T& msg) {
-    mylog::get_default_logger()->log(level, msg);
+    learnlog::get_default_logger()->log(level, msg);
 }
 
 template <typename... Args>
 void trace(fmt_format_string<Args...> fmt_fstr, Args &&...args) {
-    mylog::get_default_logger()->trace(fmt_fstr, std::forward<Args>(args)...);
+    learnlog::get_default_logger()->trace(fmt_fstr, std::forward<Args>(args)...);
 }
 
 template <typename... Args>
 void debug(fmt_format_string<Args...> fmt_fstr, Args &&...args) {
-    mylog::get_default_logger()->debug(fmt_fstr, std::forward<Args>(args)...);
+    learnlog::get_default_logger()->debug(fmt_fstr, std::forward<Args>(args)...);
 }
 
 template <typename... Args>
 void info(fmt_format_string<Args...> fmt_fstr, Args &&...args) {
-    mylog::get_default_logger()->info(fmt_fstr, std::forward<Args>(args)...);
+    learnlog::get_default_logger()->info(fmt_fstr, std::forward<Args>(args)...);
 }
 
 template <typename... Args>
 void warn(fmt_format_string<Args...> fmt_fstr, Args &&...args) {
-    mylog::get_default_logger()->warn(fmt_fstr, std::forward<Args>(args)...);
+    learnlog::get_default_logger()->warn(fmt_fstr, std::forward<Args>(args)...);
 }
 
 template <typename... Args>
 void error(fmt_format_string<Args...> fmt_fstr, Args &&...args) {
-    mylog::get_default_logger()->error(fmt_fstr, std::forward<Args>(args)...);
+    learnlog::get_default_logger()->error(fmt_fstr, std::forward<Args>(args)...);
 }
 
 template <typename... Args>
 void critical(fmt_format_string<Args...> fmt_fstr, Args &&...args) {
-    mylog::get_default_logger()->critical(fmt_fstr, std::forward<Args>(args)...);
+    learnlog::get_default_logger()->critical(fmt_fstr, std::forward<Args>(args)...);
 }
 
 template <typename T>
 void trace(const T& msg) {
-    mylog::get_default_logger()->trace(msg);
+    learnlog::get_default_logger()->trace(msg);
 }
 
 template <typename T>
 void debug(const T& msg) {
-    mylog::get_default_logger()->debug(msg);
+    learnlog::get_default_logger()->debug(msg);
 }
 
 template <typename T>
 void info(const T& msg) {
-    mylog::get_default_logger()->info(msg);
+    learnlog::get_default_logger()->info(msg);
 }
 
 template <typename T>
 void warn(const T& msg) {
-    mylog::get_default_logger()->warn(msg);
+    learnlog::get_default_logger()->warn(msg);
 }
 
 template <typename T>
 void error(const T& msg) {
-    mylog::get_default_logger()->error(msg);
+    learnlog::get_default_logger()->error(msg);
 }
 
 template <typename T>
 void critical(const T& msg) {
-    mylog::get_default_logger()->critical(msg);
+    learnlog::get_default_logger()->critical(msg);
 }
 
-}   // namespace mylog
+}   // namespace learnlog

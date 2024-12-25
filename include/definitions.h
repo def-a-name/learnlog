@@ -6,7 +6,7 @@
 #include <initializer_list>
 #include <type_traits>
 
-namespace mylog {
+namespace learnlog {
 
 // system_clock
 using sys_clock = std::chrono::system_clock;
@@ -132,25 +132,25 @@ struct source_loc {
 };
 
 
-#define MYLOG_LEVEL_TRACE 0
-#define MYLOG_LEVEL_DEBUG 1
-#define MYLOG_LEVEL_INFO 2
-#define MYLOG_LEVEL_WARN 3
-#define MYLOG_LEVEL_ERROR 4
-#define MYLOG_LEVEL_CRITICAL 5
-#define MYLOG_LEVEL_OFF 6
-#define MYLOG_LEVELS_NUM 7
+#define LEARNLOG_LEVEL_TRACE 0
+#define LEARNLOG_LEVEL_DEBUG 1
+#define LEARNLOG_LEVEL_INFO 2
+#define LEARNLOG_LEVEL_WARN 3
+#define LEARNLOG_LEVEL_ERROR 4
+#define LEARNLOG_LEVEL_CRITICAL 5
+#define LEARNLOG_LEVEL_OFF 6
+#define LEARNLOG_LEVELS_NUM 7
 // 日志等级枚举
 namespace level {
 
 enum level_enum : int {
-    trace = MYLOG_LEVEL_TRACE,
-    debug = MYLOG_LEVEL_DEBUG,
-    info = MYLOG_LEVEL_INFO,
-    warn = MYLOG_LEVEL_WARN,
-    error = MYLOG_LEVEL_ERROR,
-    critical = MYLOG_LEVEL_CRITICAL,
-    off = MYLOG_LEVEL_OFF,
+    trace = LEARNLOG_LEVEL_TRACE,
+    debug = LEARNLOG_LEVEL_DEBUG,
+    info = LEARNLOG_LEVEL_INFO,
+    warn = LEARNLOG_LEVEL_WARN,
+    error = LEARNLOG_LEVEL_ERROR,
+    critical = LEARNLOG_LEVEL_CRITICAL,
+    off = LEARNLOG_LEVEL_OFF,
 };
 
 const fmt_string_view level_name[7] = { {"trace"}, {"debug"}, {"info"}, {"warn"}, 
@@ -158,4 +158,4 @@ const fmt_string_view level_name[7] = { {"trace"}, {"debug"}, {"info"}, {"warn"}
 
 }   // namespace level
 
-}   // namespace mylog
+}   // namespace learnlog

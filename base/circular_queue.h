@@ -3,7 +3,7 @@
 #include <cassert>
 #include <vector>
 
-namespace mylog {
+namespace learnlog {
 namespace base {
 
 // 通过std::vector实现的环形队列，不保证线程安全
@@ -113,4 +113,4 @@ private:
 };
 
 }   // namespace base
-}   // namespace mylog
+}   // namespace learnlog

@@ -8,7 +8,7 @@
 
 #include "sync_factory.h"
 
-namespace mylog {
+namespace learnlog {
 namespace sinks {
 
 #ifdef _WIN32
@@ -27,24 +27,24 @@ namespace sinks {
 
 // factory 函数，创建使用 std_color_sink 的 logger 对象
 
-template <typename Factory = mylog::sync_factory>
+template <typename Factory = learnlog::sync_factory>
 logger_shr_ptr stdout_color_logger_mt(const std::string& logger_name) {
     return Factory::template create<sinks::stdout_color_sink_mt>(logger_name);
 }
 
-template <typename Factory = mylog::sync_factory>
+template <typename Factory = learnlog::sync_factory>
 logger_shr_ptr stdout_color_logger_st(const std::string& logger_name) {
     return Factory::template create<sinks::stdout_color_sink_st>(logger_name);
 }
 
-template <typename Factory = mylog::sync_factory>
+template <typename Factory = learnlog::sync_factory>
 logger_shr_ptr stderr_color_logger_mt(const std::string& logger_name) {
     return Factory::template create<sinks::stderr_color_sink_mt>(logger_name);
 }
 
-template <typename Factory = mylog::sync_factory>
+template <typename Factory = learnlog::sync_factory>
 logger_shr_ptr stderr_color_logger_st(const std::string& logger_name) {
     return Factory::template create<sinks::stderr_color_sink_st>(logger_name);
 }
 
-}   // namespace mylog
+}   // namespace learnlog

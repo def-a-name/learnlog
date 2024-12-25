@@ -1,12 +1,12 @@
 cmake_minimum_required(VERSION 3.11)
 
 # ---------------------------------------------------------------------------------------
-# Start mylog project
+# Start learnlog project
 # ---------------------------------------------------------------------------------------
 include(cmake/utils.cmake)
 
-project(mylog LANGUAGES CXX)
-message(STATUS "Build mylog")
+project(learnlog LANGUAGES CXX)
+message(STATUS "Build learnlog")
 
 # ---------------------------------------------------------------------------------------
 # Set default build to Debug
@@ -24,19 +24,19 @@ if(NOT CMAKE_CXX_STANDARD)
 endif()
 
 # warning options
-option(MYLOG_BUILD_WARNINGS "Enable compiler warnings" OFF)
+option(LEARNLOG_BUILD_WARNINGS "Enable compiler warnings" OFF)
 
 # example options
-option(MYLOG_BUILD_EXAMPLES "Build examples" ON)
+option(LEARNLOG_BUILD_EXAMPLES "Build examples" ON)
 
 # test options
-option(MYLOG_BUILD_TESTS "Build tests" OFF)
+option(LEARNLOG_BUILD_TESTS "Build tests" OFF)
 
 # sanitizer options
-option(MYLOG_SANITIZE_ADDRESS "Enable address sanitizer in tests" ON)
+option(LEARNLOG_SANITIZE_ADDRESS "Enable address sanitizer in tests" ON)
 
 # bench options
-option(MYLOG_BUILD_BENCH "Build benchmarks (Requires https://github.com/google/benchmark.git to be installed)" OFF)
+option(LEARNLOG_BUILD_BENCH "Build benchmarks (Requires https://github.com/google/benchmark.git to be installed)" OFF)
 
 # ---------------------------------------------------------------------------------------
 # Package support
@@ -61,39 +61,39 @@ message(STATUS "Build type: " ${CMAKE_BUILD_TYPE})
 # ---------------------------------------------------------------------------------------
 # Static library
 # ---------------------------------------------------------------------------------------
-set(MYLOG_HEADERS_DIR "${CMAKE_CURRENT_SOURCE_DIR}/include")
-set(MYLOG_SRCS_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src")
+set(LEARNLOG_HEADERS_DIR "${CMAKE_CURRENT_SOURCE_DIR}/include")
+set(LEARNLOG_SRCS_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src")
 
 add_subdirectory(base)
 add_subdirectory(sinks)
 
-file(GLOB MYLOG_ROOT_HEADERS "${MYLOG_HEADERS_DIR}/*.h")
-file(GLOB MYLOG_ROOT_SRCS "${MYLOG_SRCS_DIR}/*.cpp")
+file(GLOB LEARNLOG_ROOT_HEADERS "${LEARNLOG_HEADERS_DIR}/*.h")
+file(GLOB LEARNLOG_ROOT_SRCS "${LEARNLOG_SRCS_DIR}/*.cpp")
 
-add_library(mylog STATIC ${MYLOG_ROOT_SRCS})
-add_library(mylog::mylog ALIAS mylog)
-target_include_directories(mylog PUBLIC 
+add_library(learnlog STATIC ${LEARNLOG_ROOT_SRCS})
+add_library(learnlog::learnlog ALIAS learnlog)
+target_include_directories(learnlog PUBLIC 
                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
-                            $<BUILD_INTERFACE:${MYLOG_HEADERS_DIR}>)
-target_link_libraries(mylog mylog_base mylog_sinks)
-spdlog_enable_warnings(mylog)
+                            $<BUILD_INTERFACE:${LEARNLOG_HEADERS_DIR}>)
+target_link_libraries(learnlog learnlog_base learnlog_sinks)
+spdlog_enable_warnings(learnlog)
 
 # ---------------------------------------------------------------------------------------
 # Build binaries
 # ---------------------------------------------------------------------------------------
-if(MYLOG_BUILD_EXAMPLES)
+if(LEARNLOG_BUILD_EXAMPLES)
     message(STATUS "Generating example(s)")
     add_subdirectory(example)
     spdlog_enable_warnings(example)
 endif()
 
-if(MYLOG_BUILD_TESTS)
+if(LEARNLOG_BUILD_TESTS)
     message(STATUS "Generating tests")
     enable_testing()
     add_subdirectory(tests)
 endif()
 
-if(MYLOG_BUILD_BENCH)
+if(LEARNLOG_BUILD_BENCH)
     message(STATUS "Generating benchmarks")
     add_subdirectory(bench)
 endif()

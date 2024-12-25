@@ -2,7 +2,7 @@
 #include "sinks/formatters/pattern_formatter.h"
 #include "sinks/sink.h"
 
-using namespace mylog;
+using namespace learnlog;
 
 void logger::swap(logger& other) noexcept {
     name_.swap(other.name_);
@@ -14,7 +14,7 @@ void logger::swap(logger& other) noexcept {
 
 void logger::set_pattern(std::string pattern) {
     pattern_ = pattern;
-    auto p_formatter = mylog::make_unique<sinks::pattern_formatter>(std::move(pattern));
+    auto p_formatter = learnlog::make_unique<sinks::pattern_formatter>(std::move(pattern));
     set_formatter(std::move(p_formatter));
 }
 
@@ -56,7 +56,7 @@ void logger::sink_log_(const base::log_msg& msg) {
     for (auto &sink : sinks_) {
         if (sink->should_log(msg.level)) {
             try { sink->log(msg); }
-            MYLOG_CATCH
+            LEARNLOG_CATCH
         }
     }
 
@@ -68,7 +68,7 @@ void logger::sink_log_(const base::log_msg& msg) {
 void logger::flush_sink_() {
     for(auto &sink : sinks_) {
         try { sink->flush(); }
-        MYLOG_CATCH
+        LEARNLOG_CATCH
     }
 }
 

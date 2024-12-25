@@ -2,12 +2,12 @@
 #include "async_logger.h"
 #include "test_sink.h"
 #include "sinks/std_sinks.h"
-#include "mylog.h"
+#include "learnlog.h"
 
-using mylog::async_overflow_method;
+using learnlog::async_overflow_method;
 
 TEST_CASE("block_wait", "[async_logger]") {
-    auto test_sink = std::make_shared<mylog::sinks::test_sink_mt>();
+    auto test_sink = std::make_shared<learnlog::sinks::test_sink_mt>();
     test_sink->set_sink_delay_ms(2);
     auto overflow_m = async_overflow_method::block_wait;
     size_t msg_queue_size = 128;
@@ -17,9 +17,9 @@ TEST_CASE("block_wait", "[async_logger]") {
     size_t discard_cnt = 0;
 
     {
-        auto tp = std::make_shared<mylog::base::thread_pool>(msg_queue_size, 
+        auto tp = std::make_shared<learnlog::base::thread_pool>(msg_queue_size, 
                                                              thread_num);
-        auto logger = std::make_shared<mylog::async_logger>("block_wait logger",
+        auto logger = std::make_shared<learnlog::async_logger>("block_wait logger",
                                                             test_sink,
                                                             tp,
                                                             overflow_m);
@@ -38,7 +38,7 @@ TEST_CASE("block_wait", "[async_logger]") {
 }
 
 TEST_CASE("override_old", "[async_logger]") {
-    auto test_sink = std::make_shared<mylog::sinks::test_sink_mt>();
+    auto test_sink = std::make_shared<learnlog::sinks::test_sink_mt>();
     test_sink->set_sink_delay_ms(2);
     auto overflow_m = async_overflow_method::override_old;
     size_t msg_queue_size = 128;
@@ -48,9 +48,9 @@ TEST_CASE("override_old", "[async_logger]") {
     size_t discard_cnt = 0;
 
     {
-        auto tp = std::make_shared<mylog::base::thread_pool>(msg_queue_size, 
+        auto tp = std::make_shared<learnlog::base::thread_pool>(msg_queue_size, 
                                                              thread_num);
-        auto logger = std::make_shared<mylog::async_logger>("override_old logger",
+        auto logger = std::make_shared<learnlog::async_logger>("override_old logger",
                                                             test_sink,
                                                             tp,
                                                             overflow_m);
@@ -69,7 +69,7 @@ TEST_CASE("override_old", "[async_logger]") {
 }
 
 TEST_CASE("discard_new", "[async_logger]") {
-    auto test_sink = std::make_shared<mylog::sinks::test_sink_mt>();
+    auto test_sink = std::make_shared<learnlog::sinks::test_sink_mt>();
     test_sink->set_sink_delay_ms(2);
     auto overflow_m = async_overflow_method::discard_new;
     size_t msg_queue_size = 128;
@@ -79,9 +79,9 @@ TEST_CASE("discard_new", "[async_logger]") {
     size_t discard_cnt = 0;
 
     {
-        auto tp = std::make_shared<mylog::base::thread_pool>(msg_queue_size, 
+        auto tp = std::make_shared<learnlog::base::thread_pool>(msg_queue_size, 
                                                              thread_num);
-        auto logger = std::make_shared<mylog::async_logger>("discard_new logger",
+        auto logger = std::make_shared<learnlog::async_logger>("discard_new logger",
                                                             test_sink,
                                                             tp,
                                                             overflow_m);
@@ -100,16 +100,16 @@ TEST_CASE("discard_new", "[async_logger]") {
 }
 
 TEST_CASE("reset thread pool", "[async_logger]") {
-    auto test_sink = std::make_shared<mylog::sinks::test_sink_mt>();
+    auto test_sink = std::make_shared<learnlog::sinks::test_sink_mt>();
     test_sink->set_sink_delay_ms(2);
     auto overflow_m = async_overflow_method::block_wait;
     size_t msg_queue_size = 128;
     size_t thread_num = 1;
     size_t msg_num = msg_queue_size * 2;
 
-    auto tp = std::make_shared<mylog::base::thread_pool>(msg_queue_size, 
+    auto tp = std::make_shared<learnlog::base::thread_pool>(msg_queue_size, 
                                                          thread_num);
-    auto logger = std::make_shared<mylog::async_logger>("reset tp",
+    auto logger = std::make_shared<learnlog::async_logger>("reset tp",
                                                         test_sink,
                                                         tp,
                                                         overflow_m);
@@ -124,9 +124,9 @@ TEST_CASE("reset thread pool", "[async_logger]") {
 }
 
 TEST_CASE("invalid thread pool", "[async_logger]") {
-    auto test_sink = std::make_shared<mylog::sinks::test_sink_mt>();
-    std::shared_ptr<mylog::base::thread_pool> tp;
-    auto logger = std::make_shared<mylog::async_logger>("invalid tp",
+    auto test_sink = std::make_shared<learnlog::sinks::test_sink_mt>();
+    std::shared_ptr<learnlog::base::thread_pool> tp;
+    auto logger = std::make_shared<learnlog::async_logger>("invalid tp",
                                                         test_sink,
                                                         tp);
     logger->info("message will not be logged");
@@ -134,38 +134,38 @@ TEST_CASE("invalid thread pool", "[async_logger]") {
 }
 
 TEST_CASE("create_from_registry", "[interface]") {
-    mylog::remove_all();
+    learnlog::remove_all();
     size_t msg_q_size = 128;
     size_t thread_num = 1;
-    mylog::initialize_thread_pool(msg_q_size, thread_num);
-    mylog::set_global_pattern("[%n] %v");
+    learnlog::initialize_thread_pool(msg_q_size, thread_num);
+    learnlog::set_global_pattern("[%n] %v");
     
-    mylog::create_async_nonblock<mylog::sinks::test_sink_mt>("nonblock logger");
-    auto sink_nonblock = std::static_pointer_cast<mylog::sinks::test_sink_mt>(
-        mylog::get_logger("nonblock logger")->sinks()[0]
+    learnlog::create_async_nonblock<learnlog::sinks::test_sink_mt>("nonblock logger");
+    auto sink_nonblock = std::static_pointer_cast<learnlog::sinks::test_sink_mt>(
+        learnlog::get_logger("nonblock logger")->sinks()[0]
     );
-    mylog::create_async<mylog::sinks::test_sink_mt>("block logger");
-    auto sink = std::static_pointer_cast<mylog::sinks::test_sink_mt>(
-        mylog::get_logger("block logger")->sinks()[0]
+    learnlog::create_async<learnlog::sinks::test_sink_mt>("block logger");
+    auto sink = std::static_pointer_cast<learnlog::sinks::test_sink_mt>(
+        learnlog::get_logger("block logger")->sinks()[0]
     );
-    mylog::flush_all();
+    learnlog::flush_all();
 
-    auto tp = mylog::get_thread_pool();
+    auto tp = learnlog::get_thread_pool();
     REQUIRE(sink_nonblock->flush_count() == 1);
     REQUIRE(sink->flush_count() == 1);
     REQUIRE(tp->override_count() + tp->discard_count() == 0);
 }
 
 TEST_CASE("flush_every", "[interface]") {
-    mylog::create_async<mylog::sinks::test_sink_mt>("flush logger");
-    auto sink = std::static_pointer_cast<mylog::sinks::test_sink_mt>(
-        mylog::get_logger("flush logger")->sinks()[0]
+    learnlog::create_async<learnlog::sinks::test_sink_mt>("flush logger");
+    auto sink = std::static_pointer_cast<learnlog::sinks::test_sink_mt>(
+        learnlog::get_logger("flush logger")->sinks()[0]
     );
 
-    mylog::flush_every(mylog::milliseconds(300));
-    std::this_thread::sleep_for(mylog::seconds(1));
+    learnlog::flush_every(learnlog::milliseconds(300));
+    std::this_thread::sleep_for(learnlog::seconds(1));
     REQUIRE(sink->flush_count() == 3);
     
-    mylog::flush_every(mylog::seconds(0));
-    mylog::remove_all();
+    learnlog::flush_every(learnlog::seconds(0));
+    learnlog::remove_all();
 }

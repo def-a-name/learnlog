@@ -5,7 +5,7 @@
 #include "base/null_mutex.h"
 #include "sync_factory.h"
 
-namespace mylog {
+namespace learnlog {
 namespace sinks {
 
 // basic_sink 的派生类，
@@ -53,18 +53,18 @@ using basic_file_sink_st = basic_file_sink<base::null_mutex>;
 
 // factory 函数，创建使用 basic_file_sink 的 logger 对象
 
-template <typename Factory = mylog::sync_factory>
+template <typename Factory = learnlog::sync_factory>
 logger_shr_ptr basic_file_logger_mt(const std::string& logger_name,
                                     const filename_t& filename,
                                     bool truncate = false) {
     return Factory::template create<sinks::basic_file_sink_mt>(logger_name, filename, truncate);
 }
 
-template <typename Factory = mylog::sync_factory>
+template <typename Factory = learnlog::sync_factory>
 logger_shr_ptr basic_file_logger_st(const std::string& logger_name,
                                     const filename_t& filename,
                                     bool truncate = false) {
     return Factory::template create<sinks::basic_file_sink_st>(logger_name, filename, truncate);
 }
 
-}    // namespace mylog
+}    // namespace learnlog

@@ -8,7 +8,7 @@
 #include <memory>
 #include <unordered_map>
 
-namespace mylog {
+namespace learnlog {
 namespace sinks {
 
 // formatter 的派生类，通过 format() 每次格式化一条 log_msg，
@@ -34,7 +34,7 @@ public:
     // 添加自定义格式字符与格式化器，T 为 custom_flag_formatter 的派生类
     template <typename T, typename... Args>
     void add_custom_flag(char flag, Args &&...args) {
-        custom_flags_[flag] = mylog::make_unique<T>(std::forward<Args>(args)...); 
+        custom_flags_[flag] = learnlog::make_unique<T>(std::forward<Args>(args)...); 
     }
 
 private: 
@@ -50,4 +50,4 @@ private:
 };
 
 }   // namespace sinks
-}   // namespace mylog
+}   // namespace learnlog

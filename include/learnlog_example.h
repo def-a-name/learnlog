@@ -4,7 +4,7 @@
 #include "sinks/formatters/filler.h"
 #include "sinks/formatters/flag_formatter.h"
 
-namespace mylog {
+namespace learnlog {
 
 void create_thread_pool();
 
@@ -21,7 +21,7 @@ public:
         f.fill_msg(fmt_string_view{msg.msg.begin(), 6});
     }
     std::unique_ptr<custom_flag_formatter> clone() const {
-        return mylog::make_unique<custom_formatter_test>();
+        return learnlog::make_unique<custom_formatter_test>();
     }
 };
 
@@ -33,4 +33,4 @@ void logger_helloworld();
 
 void async_helloworld();
 
-}   // namespace mylog
+}   // namespace learnlog

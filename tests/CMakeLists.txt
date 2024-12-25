@@ -1,9 +1,9 @@
 cmake_minimum_required(VERSION 3.11)
-project(mylog_utests LANGUAGES CXX)
+project(learnlog_utests LANGUAGES CXX)
 
-if(NOT TARGET mylog)
+if(NOT TARGET learnlog)
     # Stand-alone build
-    find_package(mylog REQUIRED)
+    find_package(learnlog REQUIRED)
 endif()
 
 find_package(PkgConfig)
@@ -24,11 +24,11 @@ else()
     FetchContent_MakeAvailable(Catch2)
 endif()
 
-set(MYLOG_UTEST_HELLOWORLD_SOURCES
+set(LEARNLOG_UTEST_HELLOWORLD_SOURCES
     test_helloworld.cpp
 )
 
-set(MYLOG_UTEST_BASE_SOURCES
+set(LEARNLOG_UTEST_BASE_SOURCES
     test_circular_queue.cpp
     test_mpmc_queue.cpp
     test_handle_exception.cpp
@@ -37,28 +37,28 @@ set(MYLOG_UTEST_BASE_SOURCES
     test_periodic_function.cpp
 )
 
-set(MYLOG_UTEST_SINKS_SOURCES
+set(LEARNLOG_UTEST_SINKS_SOURCES
     test_filler.cpp
     test_pattern_formatter.cpp
     test_sinks.cpp
     test_backtracer.cpp
 )
 
-set(MYLOG_UTEST_INTERFACE_SOURCES
+set(LEARNLOG_UTEST_INTERFACE_SOURCES
     test_interface.cpp
     test_async_logger.cpp
 )
 
 enable_testing()
 
-function(mylog_prepare_test test_target test_srcs mylog_lib)
+function(learnlog_prepare_test test_target test_srcs learnlog_lib)
     add_executable(${test_target} ${test_srcs})
-    target_link_libraries(${test_target} PRIVATE ${mylog_lib})
+    target_link_libraries(${test_target} PRIVATE ${learnlog_lib})
     if(systemd_FOUND)
         target_link_libraries(${test_target} PRIVATE ${systemd_LIBRARIES})
     endif()
     target_link_libraries(${test_target} PRIVATE Catch2::Catch2WithMain)
-    if(MYLOG_SANITIZE_ADDRESS)
+    if(LEARNLOG_SANITIZE_ADDRESS)
         spdlog_enable_sanitizer(${test_target})
     endif()
     add_test(NAME ${test_target} COMMAND ${test_target})
@@ -66,10 +66,10 @@ function(mylog_prepare_test test_target test_srcs mylog_lib)
     spdlog_enable_warnings(${test_target})
 endfunction()
 
-if(MYLOG_BUILD_TESTS)
-    mylog_prepare_test(mylog-utests-base "${MYLOG_UTEST_BASE_SOURCES}" mylog_base)
+if(LEARNLOG_BUILD_TESTS)
+    learnlog_prepare_test(learnlog-utests-base "${LEARNLOG_UTEST_BASE_SOURCES}" learnlog_base)
 
-    mylog_prepare_test(mylog-utests-sinks "${MYLOG_UTEST_SINKS_SOURCES}" mylog)
+    learnlog_prepare_test(learnlog-utests-sinks "${LEARNLOG_UTEST_SINKS_SOURCES}" learnlog)
 
-    mylog_prepare_test(mylog-utests-interface "${MYLOG_UTEST_INTERFACE_SOURCES}" mylog)
+    learnlog_prepare_test(learnlog-utests-interface "${LEARNLOG_UTEST_INTERFACE_SOURCES}" learnlog)
 endif()

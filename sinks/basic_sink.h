@@ -5,7 +5,7 @@
 
 #include <mutex>
 
-namespace mylog {
+namespace learnlog {
 namespace sinks {
 
 // sink 的派生类，
@@ -18,7 +18,7 @@ template <typename Mutex>
 class basic_sink : public sink {
 public:
     ~basic_sink() override = default;
-    basic_sink() : formatter_{mylog::make_unique<pattern_formatter>()} {}
+    basic_sink() : formatter_{learnlog::make_unique<pattern_formatter>()} {}
     explicit basic_sink(formatter_uni_ptr formatter) : formatter_{std::move(formatter)} {}
 
     basic_sink(const basic_sink &) = delete;
@@ -52,7 +52,7 @@ protected:
 
     // 以模板字符串 pattern 创建 pattern_formatter
     virtual void set_pattern_(const std::string &pattern) {
-        formatter_ = mylog::make_unique<pattern_formatter>(pattern);
+        formatter_ = learnlog::make_unique<pattern_formatter>(pattern);
     }
 
     virtual void set_formatter_(formatter_uni_ptr formatter) {
@@ -64,4 +64,4 @@ protected:
 };
 
 }   // namespace sinks
-}   // namespace mylog
+}   // namespace learnlog

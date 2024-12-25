@@ -3,7 +3,7 @@
 #include "sinks/std_color_sinks.h"
 #include "logger.h"
 
-using namespace mylog;
+using namespace learnlog;
 using namespace base;
 
 /* public */
@@ -65,7 +65,7 @@ void registry::set_global_pattern(std::string pattern) {
         global_pattern_ = pattern;
     }
     auto new_pattern_formatter = 
-        mylog::make_unique<sinks::pattern_formatter>(std::move(pattern));
+        learnlog::make_unique<sinks::pattern_formatter>(std::move(pattern));
     set_global_formatter(std::move(new_pattern_formatter));
 }
 
@@ -85,9 +85,9 @@ void registry::set_pattern(const std::string& logger_name, std::string pattern) 
     }
     else {
         std::string err_str = fmt::format(
-            "mylog::registry: set_logger_pattern() failed: "
+            "learnlog::registry: set_logger_pattern() failed: "
             "logger with name '{}' does not exist", logger_name);
-        throw_mylog_excpt(err_str);
+        throw_learnlog_excpt(err_str);
     }
 }
 
@@ -99,9 +99,9 @@ void registry::set_log_level(const std::string& logger_name, level::level_enum l
     }
     else {
         std::string err_str = fmt::format(
-            "mylog::registry: set_log_level() failed: "
+            "learnlog::registry: set_log_level() failed: "
             "logger with name '{}' does not exist", logger_name);
-        throw_mylog_excpt(err_str);
+        throw_learnlog_excpt(err_str);
     }
 }
 
@@ -121,9 +121,9 @@ void registry::set_flush_level(const std::string& logger_name, level::level_enum
     }
     else {
         std::string err_str = fmt::format(
-            "mylog::registry: set_flush_level() failed: "
+            "learnlog::registry: set_flush_level() failed: "
             "logger with name '{}' does not exist", logger_name);
-        throw_mylog_excpt(err_str);
+        throw_learnlog_excpt(err_str);
     }
 }
 
@@ -190,7 +190,7 @@ registry& registry::instance() {
 /* private */
 
 registry::registry() 
-    : global_formatter_(mylog::make_unique<sinks::pattern_formatter>()) {
+    : global_formatter_(learnlog::make_unique<sinks::pattern_formatter>()) {
     sink_shr_ptr default_sink = std::make_shared<sinks::stdout_color_sink_mt>();
     std::string default_logger_name = "";
     default_logger_ = std::make_shared<logger>(default_logger_name, default_sink);
@@ -203,9 +203,9 @@ void registry::register_logger_(logger_shr_ptr new_logger) {
     std::string logger_name = new_logger->name();
     if (loggers_.find(logger_name) != loggers_.end()) {
         std::string err_str = fmt::format(
-            "mylog::registry: register_logger_() failed: "
+            "learnlog::registry: register_logger_() failed: "
             "logger with name '{}' already exists", logger_name);
-        throw_mylog_excpt(err_str);
+        throw_learnlog_excpt(err_str);
     }
     loggers_[logger_name] = std::move(new_logger);
 }

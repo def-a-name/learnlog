@@ -2,7 +2,7 @@
 
 #include "base/log_msg.h"
 
-namespace mylog {
+namespace learnlog {
 namespace base {
 
 /*
@@ -28,4 +28,4 @@ private:
 };
 
 }   // namespace base
-}   // namespace mylog
+}   // namespace learnlog

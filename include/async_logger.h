@@ -6,7 +6,7 @@
 
 #include <future>
 
-namespace mylog {
+namespace learnlog {
 
 class async_logger final : public std::enable_shared_from_this<async_logger>, 
                            public logger {
@@ -50,11 +50,11 @@ private:
                 tp_ptr->enqueue_log(shared_from_this(), msg, overflow_method_);
             }
             else {
-                throw_mylog_excpt(
-                    "mylog::async_logger: sink_log_() failed: thread pool does not exist");
+                throw_learnlog_excpt(
+                    "learnlog::async_logger: sink_log_() failed: thread pool does not exist");
             }
         }
-        MYLOG_CATCH
+        LEARNLOG_CATCH
     }
 
     void flush_sink_() override {
@@ -66,16 +66,16 @@ private:
                 }
                 catch (const std::future_error& fe) {
                     std::string err_str = 
-                        fmt::format("mylog::async_logger [{}]: flush message was dropped", logger::name_);
-                    throw_mylog_excpt(err_str);
+                        fmt::format("learnlog::async_logger [{}]: flush message was dropped", logger::name_);
+                    throw_learnlog_excpt(err_str);
                 }
             }
             else {
-                throw_mylog_excpt(
-                    "mylog::async_logger: flush_sink_() failed: thread pool does not exist");
+                throw_learnlog_excpt(
+                    "learnlog::async_logger: flush_sink_() failed: thread pool does not exist");
             }
         }
-        MYLOG_CATCH
+        LEARNLOG_CATCH
     }
 
     friend class base::thread_pool;
@@ -84,7 +84,7 @@ private:
         for (auto &sink : sinks_) {
             if (sink->should_log(msg_popped.level)) {
                 try { sink->log(msg_popped); }
-                MYLOG_CATCH
+                LEARNLOG_CATCH
             }
         }
 
@@ -96,7 +96,7 @@ private:
     void do_flush_sink_() {
         for(auto &sink : sinks_) {
             try { sink->flush(); }
-            MYLOG_CATCH
+            LEARNLOG_CATCH
         }
     }
 
@@ -104,4 +104,4 @@ private:
     async_overflow_method overflow_method_;
 };
 
-}   // namespace mylog
+}   // namespace learnlog

@@ -7,7 +7,7 @@
 
 #include <mutex>
 
-namespace mylog {
+namespace learnlog {
 namespace sinks {
 
 // sink 的派生类，
@@ -22,7 +22,7 @@ public:
 
     wincolor_sink(void* handle) : mutex_(StaticMutex::mutex()), 
                                   handle_(handle),
-                                  formatter_(mylog::make_unique<pattern_formatter>()) {
+                                  formatter_(learnlog::make_unique<pattern_formatter>()) {
         DWORD console_mode;
         bool in_console = ::GetConsoleMode(handle_, &console_mode) != 0;
         is_color_enabled_ = in_console;     // win 环境下，只要 sink 输出到控制台，都可以上色
@@ -88,7 +88,7 @@ public:
 
         if (bytes_written != wbuf.size()) {
             source_loc loc{__FILE__, __LINE__, __func__};
-            throw_mylog_excpt("mylog::wincolor_sink: WriteConsoleW() failed", ::GetLastError(), loc);
+            throw_learnlog_excpt("learnlog::wincolor_sink: WriteConsoleW() failed", ::GetLastError(), loc);
         }
     }
 
@@ -98,7 +98,7 @@ public:
 
     void set_pattern(const std::string& pattern) override {
         std::lock_guard<mutex_t> lock(mutex_);
-        formatter_ = mylog::make_unique<pattern_formatter>(pattern);
+        formatter_ = learnlog::make_unique<pattern_formatter>(pattern);
     }
 
     void set_formatter(formatter_uni_ptr formatter) override {
@@ -111,7 +111,7 @@ private:
     HANDLE handle_;
     formatter_uni_ptr formatter_;
     bool is_color_enabled_;
-    std::array<WORD, MYLOG_LEVELS_NUM> level_colors_;
+    std::array<WORD, LEARNLOG_LEVELS_NUM> level_colors_;
 
     // 获取当前控制台的字体颜色
     WORD get_text_color_() {
@@ -153,4 +153,4 @@ using stderr_wincolor_sink_mt = stderr_wincolor_sink<base::static_mutex>;
 using stderr_wincolor_sink_st = stderr_wincolor_sink<base::static_nullmutex>;
 
 }   // namespace sinks
-}   // namespace mylog
+}   // namespace learnlog

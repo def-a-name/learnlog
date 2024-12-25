@@ -5,7 +5,7 @@
 #include <iostream>
 #include <thread>
 
-using q_type = mylog::base::mpmc_blocking_queue<int>;
+using q_type = learnlog::base::mpmc_blocking_queue<int>;
 using std::chrono::milliseconds;
 using test_clock = std::chrono::high_resolution_clock;
 
@@ -111,7 +111,7 @@ int mpmc(q_type& q, size_t q_size,
                     break;
             }
             enqueue_cnt++;
-            mylog::base::os::sleep_for_ms(write_interval);
+            learnlog::base::os::sleep_for_ms(write_interval);
         }
         if (enqueue_cnt.load() == enqueue_num) {
             finished.store(true);

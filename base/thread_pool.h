@@ -7,7 +7,7 @@
 #include <vector>
 #include <functional>
 
-namespace mylog {
+namespace learnlog {
 
 namespace base {
 
@@ -57,4 +57,4 @@ private:
 };
 
 }   // namespace base
-}   // namespace mylog
+}   // namespace learnlog

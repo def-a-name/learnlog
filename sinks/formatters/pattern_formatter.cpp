@@ -4,7 +4,7 @@
 #include <cstring>
 #include <cctype>
 
-using namespace mylog;
+using namespace learnlog;
 using namespace sinks;
 
 pattern_formatter::pattern_formatter(std::string pattern,
@@ -21,7 +21,7 @@ pattern_formatter::pattern_formatter()
     : pattern_("%+"),
       eol_(DEFAULT_EOL) {
 
-    formatters_.push_back(mylog::make_unique<full_formatter>(spaces_info{}));
+    formatters_.push_back(learnlog::make_unique<full_formatter>(spaces_info{}));
 }
 
 void pattern_formatter::format(const base::log_msg& msg, fmt_memory_buf& dest_buf) {
@@ -37,7 +37,7 @@ formatter_uni_ptr pattern_formatter::clone() const {
     for (const auto& p : custom_flags_) {
         custom_flags_clone[p.first] = p.second->clone();
     }
-    return mylog::make_unique<pattern_formatter>(pattern_, eol_, std::move(custom_flags_clone));
+    return learnlog::make_unique<pattern_formatter>(pattern_, eol_, std::move(custom_flags_clone));
 }
 
 void pattern_formatter::set_pattern(std::string pattern) {
@@ -65,7 +65,7 @@ void pattern_formatter::analyse_pattern_(const std::string& pattern) {
         }
         else {
             if (!as_is_formatter) {
-                as_is_formatter = mylog::make_unique<aggregate_formatter>();
+                as_is_formatter = learnlog::make_unique<aggregate_formatter>();
             }
             as_is_formatter->add_ch(*it);
         }
@@ -162,128 +162,128 @@ void pattern_formatter::append_flag_formatter_(char flag, const spaces_info& sp_
     */
     switch (flag) {
         case ('+'):  
-            formatters_.push_back(mylog::make_unique<full_formatter>(sp_info));
+            formatters_.push_back(learnlog::make_unique<full_formatter>(sp_info));
             break;
         
         case ('n'):  
-            formatters_.push_back(mylog::make_unique<name_formatter>(sp_info));
+            formatters_.push_back(learnlog::make_unique<name_formatter>(sp_info));
             break;
 
         case ('l'):  
-            formatters_.push_back(mylog::make_unique<level_formatter>(sp_info));
+            formatters_.push_back(learnlog::make_unique<level_formatter>(sp_info));
             break;
 
         case ('a'):  
-            formatters_.push_back(mylog::make_unique<a_formatter>(sp_info));
+            formatters_.push_back(learnlog::make_unique<a_formatter>(sp_info));
             break;
 
         case ('b'):  
-            formatters_.push_back(mylog::make_unique<b_formatter>(sp_info));
+            formatters_.push_back(learnlog::make_unique<b_formatter>(sp_info));
             break;
 
         case ('c'):  
-            formatters_.push_back(mylog::make_unique<c_formatter>(sp_info));
+            formatters_.push_back(learnlog::make_unique<c_formatter>(sp_info));
             break;
 
         case ('y'):  
-            formatters_.push_back(mylog::make_unique<y_formatter>(sp_info));
+            formatters_.push_back(learnlog::make_unique<y_formatter>(sp_info));
             break;
 
         case ('m'):  
-            formatters_.push_back(mylog::make_unique<m_formatter>(sp_info));
+            formatters_.push_back(learnlog::make_unique<m_formatter>(sp_info));
             break;
 
         case ('d'):  
-            formatters_.push_back(mylog::make_unique<d_formatter>(sp_info));
+            formatters_.push_back(learnlog::make_unique<d_formatter>(sp_info));
             break;
 
         case ('H'):  
-            formatters_.push_back(mylog::make_unique<H_formatter>(sp_info));
+            formatters_.push_back(learnlog::make_unique<H_formatter>(sp_info));
             break;
 
         case ('M'):  
-            formatters_.push_back(mylog::make_unique<M_formatter>(sp_info));
+            formatters_.push_back(learnlog::make_unique<M_formatter>(sp_info));
             break;
 
         case ('S'):  
-            formatters_.push_back(mylog::make_unique<S_formatter>(sp_info));
+            formatters_.push_back(learnlog::make_unique<S_formatter>(sp_info));
             break;
 
         case ('E'):  
-            formatters_.push_back(mylog::make_unique<E_formatter>(sp_info));
+            formatters_.push_back(learnlog::make_unique<E_formatter>(sp_info));
             break;
 
         case ('F'):  
-            formatters_.push_back(mylog::make_unique<F_formatter>(sp_info));
+            formatters_.push_back(learnlog::make_unique<F_formatter>(sp_info));
             break;
 
         case ('G'):  
-            formatters_.push_back(mylog::make_unique<G_formatter>(sp_info));
+            formatters_.push_back(learnlog::make_unique<G_formatter>(sp_info));
             break;
 
         case ('T'):  
-            formatters_.push_back(mylog::make_unique<T_formatter>(sp_info));
+            formatters_.push_back(learnlog::make_unique<T_formatter>(sp_info));
             break;
 
         case ('W'):
-            formatters_.push_back(mylog::make_unique<duration_formatter<nanoseconds> >(sp_info));
+            formatters_.push_back(learnlog::make_unique<duration_formatter<nanoseconds> >(sp_info));
             break;
 
         case ('X'):
-            formatters_.push_back(mylog::make_unique<duration_formatter<microseconds> >(sp_info));
+            formatters_.push_back(learnlog::make_unique<duration_formatter<microseconds> >(sp_info));
             break;
 
         case ('Y'):
-            formatters_.push_back(mylog::make_unique<duration_formatter<milliseconds> >(sp_info));
+            formatters_.push_back(learnlog::make_unique<duration_formatter<milliseconds> >(sp_info));
             break;
 
         case ('Z'):
-            formatters_.push_back(mylog::make_unique<duration_formatter<seconds> >(sp_info));
+            formatters_.push_back(learnlog::make_unique<duration_formatter<seconds> >(sp_info));
             break;
 
         case ('p'):  
-            formatters_.push_back(mylog::make_unique<p_formatter>(sp_info));
+            formatters_.push_back(learnlog::make_unique<p_formatter>(sp_info));
             break;
 
         case ('t'):  
-            formatters_.push_back(mylog::make_unique<t_formatter>(sp_info));
+            formatters_.push_back(learnlog::make_unique<t_formatter>(sp_info));
             break;
 
         case ('v'):  
-            formatters_.push_back(mylog::make_unique<v_formatter>(sp_info));
+            formatters_.push_back(learnlog::make_unique<v_formatter>(sp_info));
             break;
 
         case ('^'):  
-            formatters_.push_back(mylog::make_unique<color_start_formatter>(sp_info));
+            formatters_.push_back(learnlog::make_unique<color_start_formatter>(sp_info));
             break;
 
         case ('$'):  
-            formatters_.push_back(mylog::make_unique<color_end_formatter>(sp_info));
+            formatters_.push_back(learnlog::make_unique<color_end_formatter>(sp_info));
             break;
 
         case ('@'):  
-            formatters_.push_back(mylog::make_unique<source_loc_formatter>(sp_info));
+            formatters_.push_back(learnlog::make_unique<source_loc_formatter>(sp_info));
             break;
 
         case ('A'):  
-            formatters_.push_back(mylog::make_unique<source_filename_formatter>(sp_info));
+            formatters_.push_back(learnlog::make_unique<source_filename_formatter>(sp_info));
             break;
 
         case ('B'):  
-            formatters_.push_back(mylog::make_unique<source_linenum_formatter>(sp_info));
+            formatters_.push_back(learnlog::make_unique<source_linenum_formatter>(sp_info));
             break;
 
         case ('C'):  
-            formatters_.push_back(mylog::make_unique<source_funcname_formatter>(sp_info));
+            formatters_.push_back(learnlog::make_unique<source_funcname_formatter>(sp_info));
             break;
 
         case ('%'):  
-            formatters_.push_back(mylog::make_unique<char_formatter>('%'));
+            formatters_.push_back(learnlog::make_unique<char_formatter>('%'));
             break;
 
         // 格式字符未找到
         default:
-            auto unknown_flag = mylog::make_unique<aggregate_formatter>();
+            auto unknown_flag = learnlog::make_unique<aggregate_formatter>();
             unknown_flag->add_ch('%');
             unknown_flag->add_ch(flag);
             formatters_.push_back(std::move(unknown_flag));

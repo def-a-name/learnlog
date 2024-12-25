@@ -1,7 +1,7 @@
 #include "async_msg.h"
 #include <functional>
 
-using namespace mylog;
+using namespace learnlog;
 using namespace base;
 
 async_msg::async_msg(async_logger_shr_ptr&& logger_in, 

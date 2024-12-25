@@ -1,27 +1,27 @@
-#include "mylog_example.h"
+#include "learnlog_example.h"
 
 int main(int argc, char* argv[])
 { 
-    mylog::handle_exception("err");
+    learnlog::handle_exception("err");
 
-    mylog::create_thread_pool();
+    learnlog::create_thread_pool();
 
-    mylog::fmt_memory_buf buf;
+    learnlog::fmt_memory_buf buf;
     
-    mylog::filler_helloworld(buf);
-    mylog::print_fmt_buf(buf);
+    learnlog::filler_helloworld(buf);
+    learnlog::print_fmt_buf(buf);
 
     buf.clear();
-    mylog::pattern_formatter_helloworld(buf);
-    mylog::print_fmt_buf(buf);
+    learnlog::pattern_formatter_helloworld(buf);
+    learnlog::print_fmt_buf(buf);
 
     buf.clear();
-    mylog::custom_formatter_hello(buf);
-    mylog::print_fmt_buf(buf);
+    learnlog::custom_formatter_hello(buf);
+    learnlog::print_fmt_buf(buf);
 
-    mylog::logger_helloworld();
+    learnlog::logger_helloworld();
 
-    mylog::async_helloworld();
+    learnlog::async_helloworld();
     
 
     return 0;

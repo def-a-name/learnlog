@@ -20,14 +20,14 @@
     #define R_FNAME "test_tmp/rolling_file_sink_test.txt"
 #endif
 
-using mylog::filename_t;
+using learnlog::filename_t;
 
 std::string logger_ostream_sink_str(const std::string& text, std::string pattern) {
     std::ostringstream oss;
-    auto oss_sink = std::make_shared<mylog::sinks::ostream_sink_st>(oss);
-    mylog::logger oss_logger("ostream sink test logger", oss_sink);
+    auto oss_sink = std::make_shared<learnlog::sinks::ostream_sink_st>(oss);
+    learnlog::logger oss_logger("ostream sink test logger", oss_sink);
     
-    oss_logger.set_log_level(mylog::level::info);
+    oss_logger.set_log_level(learnlog::level::info);
     oss_logger.set_pattern(pattern);
 
     oss_logger.info(text);
@@ -35,39 +35,39 @@ std::string logger_ostream_sink_str(const std::string& text, std::string pattern
 }
 
 void logger_std_sink(FILE* file, const std::string& text, std::string pattern) {
-    using std_sink_st = mylog::sinks::std_sink<mylog::base::static_nullmutex>;
+    using std_sink_st = learnlog::sinks::std_sink<learnlog::base::static_nullmutex>;
 
     auto std_sink = std::make_shared<std_sink_st>(file);
-    mylog::logger std_logger("stdout/stderr sink test logger", std_sink);
+    learnlog::logger std_logger("stdout/stderr sink test logger", std_sink);
     
-    std_logger.set_log_level(mylog::level::trace);
+    std_logger.set_log_level(learnlog::level::trace);
     std_logger.set_pattern(pattern);
     std_logger.info(text);
 }
 
 void logger_stdout_color_sink(const std::string& text, std::string pattern,
-                              mylog::level::level_enum msg_lvl) {
-    auto color_sink = std::make_shared<mylog::sinks::stdout_color_sink_st>();
-    mylog::logger color_logger("stdout color sink test logger", color_sink);
+                              learnlog::level::level_enum msg_lvl) {
+    auto color_sink = std::make_shared<learnlog::sinks::stdout_color_sink_st>();
+    learnlog::logger color_logger("stdout color sink test logger", color_sink);
     
-    color_logger.set_log_level(mylog::level::trace);
+    color_logger.set_log_level(learnlog::level::trace);
     color_logger.set_pattern(pattern);
     color_logger.log(msg_lvl, text);
 }
 
 void logger_basic_file_sink(const std::string& text, std::string pattern,
                             const filename_t& filename, bool trunc) {
-    auto file_sink = std::make_shared<mylog::sinks::basic_file_sink_st>(filename, trunc);
-    mylog::logger file_logger("basic file sink test logger", file_sink);
+    auto file_sink = std::make_shared<learnlog::sinks::basic_file_sink_st>(filename, trunc);
+    learnlog::logger file_logger("basic file sink test logger", file_sink);
     
-    file_logger.set_log_level(mylog::level::trace);
+    file_logger.set_log_level(learnlog::level::trace);
     file_logger.set_pattern(pattern);
     file_logger.info(text);
     file_logger.flush();
 }
 
 void rolling_file_sink_info(const std::string& text, std::string pattern,
-                            mylog::logger_shr_ptr logger) {
+                            learnlog::logger_shr_ptr logger) {
     logger->set_pattern(pattern);
     logger->info(text);
 }
@@ -96,13 +96,13 @@ TEST_CASE("std_sink", "[sinks]") {
 
 TEST_CASE("stdout_color_sink", "[sinks]") {
     std::string txt = "hello world!";
-    logger_stdout_color_sink(txt, "", mylog::level::trace);
-    logger_stdout_color_sink(txt, "[%n] %^%c%$ [%l] msg: %v", mylog::level::trace);
-    logger_stdout_color_sink(txt, "[%n] %c %^[%l]%$ msg: %v", mylog::level::debug);
-    logger_stdout_color_sink(txt, "[%n] %c [%l] %^msg:%$ %v", mylog::level::info);
-    logger_stdout_color_sink(txt, "[%n] %c [%l] msg: %^%v%$", mylog::level::warn);
-    logger_stdout_color_sink(txt, "%^[%n]%$ %c [%l] msg: %v", mylog::level::error);
-    logger_stdout_color_sink(txt, "[%n] %c [%l] %^msg: %v%$", mylog::level::critical);
+    logger_stdout_color_sink(txt, "", learnlog::level::trace);
+    logger_stdout_color_sink(txt, "[%n] %^%c%$ [%l] msg: %v", learnlog::level::trace);
+    logger_stdout_color_sink(txt, "[%n] %c %^[%l]%$ msg: %v", learnlog::level::debug);
+    logger_stdout_color_sink(txt, "[%n] %c [%l] %^msg:%$ %v", learnlog::level::info);
+    logger_stdout_color_sink(txt, "[%n] %c [%l] msg: %^%v%$", learnlog::level::warn);
+    logger_stdout_color_sink(txt, "%^[%n]%$ %c [%l] msg: %v", learnlog::level::error);
+    logger_stdout_color_sink(txt, "[%n] %c [%l] %^msg: %v%$", learnlog::level::critical);
 }
 
 TEST_CASE("basic_file_sink", "[sinks]") {
@@ -124,17 +124,17 @@ TEST_CASE("rolling_file_sink", "[sinks]") {
     clean_test_tmp();
     FILE* fp = nullptr;
 #ifdef _WIN32
-    mylog::filename_t fname = L"test_tmp/rolling_file_sink_test_1.txt";
+    learnlog::filename_t fname = L"test_tmp/rolling_file_sink_test_1.txt";
 #else
-    mylog::filename_t fname = "test_tmp/rolling_file_sink_test_1.txt";
+    learnlog::filename_t fname = "test_tmp/rolling_file_sink_test_1.txt";
 #endif
-    mylog::base::file_base::open(&fp, fname);
-    mylog::base::file_base::close(&fp, fname);
+    learnlog::base::file_base::open(&fp, fname);
+    learnlog::base::file_base::close(&fp, fname);
 
-    auto roll_sink = std::make_shared<mylog::sinks::rolling_file_sink_st>(R_FNAME,
+    auto roll_sink = std::make_shared<learnlog::sinks::rolling_file_sink_st>(R_FNAME,
                                                                           file_size,
                                                                           file_num);
-    auto roll_logger = std::make_shared<mylog::logger>("rolling file sink test logger",
+    auto roll_logger = std::make_shared<learnlog::logger>("rolling file sink test logger",
                                                        roll_sink);
     rolling_file_sink_info(txt, "", roll_logger);
     rolling_file_sink_info(txt, "%=16v", roll_logger);
@@ -155,28 +155,28 @@ TEST_CASE("multithread", "[sinks]") {
     size_t roll_num = 1024;
 
     std::ostringstream oss;
-    auto oss_sink = std::make_shared<mylog::sinks::ostream_sink_mt>(oss);
-    auto stdout_sink = std::make_shared<mylog::sinks::stdout_sink_mt>();
-    auto stdout_color_sink = std::make_shared<mylog::sinks::stdout_color_sink_mt>();
-    auto basic_file_sink = std::make_shared<mylog::sinks::basic_file_sink_mt>(B_FNAME);
+    auto oss_sink = std::make_shared<learnlog::sinks::ostream_sink_mt>(oss);
+    auto stdout_sink = std::make_shared<learnlog::sinks::stdout_sink_mt>();
+    auto stdout_color_sink = std::make_shared<learnlog::sinks::stdout_color_sink_mt>();
+    auto basic_file_sink = std::make_shared<learnlog::sinks::basic_file_sink_mt>(B_FNAME);
     auto rolling_file_sink = 
-        std::make_shared<mylog::sinks::rolling_file_sink_mt>(R_FNAME, roll_size, roll_num);
+        std::make_shared<learnlog::sinks::rolling_file_sink_mt>(R_FNAME, roll_size, roll_num);
 
-    mylog::logger mt_logger_1("multithread test logger 1", {oss_sink,
+    learnlog::logger mt_logger_1("multithread test logger 1", {oss_sink,
                                                             stdout_sink,
                                                             stdout_color_sink,
                                                             basic_file_sink,
                                                             rolling_file_sink});
-    mt_logger_1.set_log_level(mylog::level::trace);
+    mt_logger_1.set_log_level(learnlog::level::trace);
     mt_logger_1.set_pattern("");
     mt_logger_1.debug("");
     mt_logger_1.set_pattern("<%n> from thread %t");
-    mylog::logger mt_logger_2("multithread test logger 2", {oss_sink,
+    learnlog::logger mt_logger_2("multithread test logger 2", {oss_sink,
                                                             stdout_sink,
                                                             stdout_color_sink,
                                                             basic_file_sink,
                                                             rolling_file_sink});
-    mt_logger_2.set_log_level(mylog::level::trace);
+    mt_logger_2.set_log_level(learnlog::level::trace);
     auto func = [&mt_logger_1, &mt_logger_2](int i) { 
         if (i % 2 == 0) mt_logger_1.debug(""); 
         else mt_logger_2.debug("");
@@ -211,7 +211,7 @@ TEST_CASE("multithread", "[sinks]") {
     size_t total_lines = 0;
     for (size_t idx = 1; idx < roll_num; idx++) {
         filename_t rollname = rolling_file_sink->get_rolling_filename(idx);
-        if ( !mylog::base::os::dir_exist(rollname) ) break;
+        if ( !learnlog::base::os::dir_exist(rollname) ) break;
 
         std::string fname(rollname.begin(), rollname.end());
         std::ifstream ifs(fname, std::ios_base::binary);

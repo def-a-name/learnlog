@@ -7,12 +7,12 @@
 #include <string>
 
 void throw_error(int cnt) {
-    mylog::source_loc s;
+    learnlog::source_loc s;
     try{
         std::string info = "err" + std::to_string(cnt);
         throw std::runtime_error(info);
     }
-    MYLOG_CATCH
+    LEARNLOG_CATCH
 }
 
 TEST_CASE("test_handle_exception_std_thread", "[exception]") {

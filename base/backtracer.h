@@ -7,7 +7,7 @@
 #include <mutex>
 #include <functional>
 
-namespace mylog {
+namespace learnlog {
 namespace base {
 
 // 日志备份类,
@@ -74,4 +74,4 @@ private:
 };
 
 }   // namespace base
-}   // namespace mylog
+}   // namespace learnlog

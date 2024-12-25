@@ -1,7 +1,7 @@
 #include "base/log_msg_buf.h"
 #include "base/os.h"
 
-using namespace mylog;
+using namespace learnlog;
 using namespace base;
 
 log_msg_buf::log_msg_buf(const log_msg &init_msg)

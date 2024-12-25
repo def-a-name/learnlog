@@ -18,13 +18,13 @@ void clean_test_tmp() {
 #endif
 }
 
-mylog::u_long_long get_filesize(const std::string& filename) {
+learnlog::u_long_long get_filesize(const std::string& filename) {
     std::ifstream ifs(filename, std::ifstream::ate | std::ifstream::binary);
     if (!ifs) {
         throw std::runtime_error("Failed to create ifstream");
     }
 
-    return static_cast<mylog::u_long_long>(ifs.tellg());
+    return static_cast<learnlog::u_long_long>(ifs.tellg());
 }
 
 size_t count_lines(std::istream& istream_in) {
@@ -36,7 +36,7 @@ size_t count_lines(std::istream& istream_in) {
     return cnt;
 }
 
-std::string file_content(const mylog::filename_t& filename) {
+std::string file_content(const learnlog::filename_t& filename) {
     std::string fname(filename.begin(), filename.end());
     std::ifstream ifs(fname, std::ios_base::binary);
     if (!ifs) {
@@ -48,8 +48,8 @@ std::string file_content(const mylog::filename_t& filename) {
 
 
 static void write_a_ntimes(FILE* fp, const std::string& filename, size_t ntimes) {
-    mylog::fmt_memory_buf buf;
+    learnlog::fmt_memory_buf buf;
     fmt::format_to(std::back_inserter(buf), FMT_STRING("{}"), std::string(ntimes, 'a'));
-    mylog::base::file_base::write(fp, filename, buf);
-    mylog::base::file_base::flush(fp, filename);
+    learnlog::base::file_base::write(fp, filename, buf);
+    learnlog::base::file_base::flush(fp, filename);
 }

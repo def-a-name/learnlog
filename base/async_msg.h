@@ -3,7 +3,7 @@
 #include "base/log_msg_buf.h"
 #include <future>
 
-namespace mylog {
+namespace learnlog {
 
 enum async_overflow_method {
     discard_new,
@@ -48,4 +48,4 @@ public:
 };
 
 }   // namespace base
-}   // namespace mylog
+}   // namespace learnlog

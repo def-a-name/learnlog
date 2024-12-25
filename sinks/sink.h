@@ -6,7 +6,7 @@
 
 #include <atomic>
 
-namespace mylog {
+namespace learnlog {
 namespace sinks {
 
 // 所有 sink 的基类，
@@ -27,7 +27,7 @@ public:
         sink_level_.store(sink_level, std::memory_order_relaxed);
     }
     level::level_enum get_level() const {
-        return static_cast<mylog::level::level_enum>(sink_level_.load(std::memory_order_relaxed));
+        return static_cast<learnlog::level::level_enum>(sink_level_.load(std::memory_order_relaxed));
     }
     // log_msg 的等级高于 sink 等级才能被 sink 输出
     bool should_log(level::level_enum msg_level) const {
@@ -39,4 +39,4 @@ protected:
 };
 
 }   // namespace sinks
-}   // namespace mylog
+}   // namespace learnlog

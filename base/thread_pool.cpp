@@ -2,7 +2,7 @@
 #include "base/exception.h"
 #include "async_logger.h"
 
-using namespace mylog;
+using namespace learnlog;
 using namespace base;
 
 thread_pool::thread_pool(size_t queue_size, size_t threads_num, 
@@ -13,8 +13,8 @@ thread_pool::thread_pool(size_t queue_size, size_t threads_num,
     stop_func_(on_thread_stop)
 {
     if(threads_num <= 0 || threads_num > 1000) {
-        throw_mylog_excpt(
-            "mylog::thread_pool(): invalid threads_num param "
+        throw_learnlog_excpt(
+            "learnlog::thread_pool(): invalid threads_num param "
             "(valid range is 1-1000)");
     }
     
@@ -46,7 +46,7 @@ thread_pool::~thread_pool() {
     }
     catch(const std::exception& e) {
         source_loc loc{__FILE__, __LINE__, __func__};
-        throw_mylog_excpt(e.what(), os::get_errno(), loc);
+        throw_learnlog_excpt(e.what(), os::get_errno(), loc);
     }
 }
 

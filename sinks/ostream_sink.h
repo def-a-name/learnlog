@@ -6,7 +6,7 @@
 #include <mutex>
 #include <ostream>
 
-namespace mylog {
+namespace learnlog {
 namespace sinks {
 
 // basic_sink 的派生类，
@@ -42,4 +42,4 @@ using ostream_sink_mt = ostream_sink<std::mutex>;
 using ostream_sink_st = ostream_sink<base::null_mutex>;
 
 }    // namespace sinks
-}    // namespace mylog
+}    // namespace learnlog

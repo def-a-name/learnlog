@@ -3,7 +3,7 @@
 #include "sinks/basic_sink.h"
 #include "base/null_mutex.h"
 
-namespace mylog {
+namespace learnlog {
 namespace sinks {
 
 template <typename Mutex>
@@ -54,4 +54,4 @@ using test_sink_mt = test_sink<std::mutex>;
 using test_sink_st = test_sink<base::null_mutex>;
 
 }   // namespace sinks
-}   // namespace mylog
+}   // namespace learnlog

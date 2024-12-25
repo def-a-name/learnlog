@@ -1,50 +1,50 @@
 #include <catch2/catch_all.hpp>
 #include "sinks/formatters/filler.h"
 
-using mylog::fmt_string_view;
-using mylog::fmt_memory_buf;
-using mylog::sinks::spaces_info;
+using learnlog::fmt_string_view;
+using learnlog::fmt_memory_buf;
+using learnlog::sinks::spaces_info;
 
 TEST_CASE("fill_spaces", "[filler]") {
-    mylog::sinks::spaces_info s_info(4, spaces_info::fill_side::center, false);
+    learnlog::sinks::spaces_info s_info(4, spaces_info::fill_side::center, false);
     unsigned n = 1;
 
     fmt_memory_buf buf;
     {
-        mylog::sinks::filler filler(0, s_info, buf);
+        learnlog::sinks::filler filler(0, s_info, buf);
     }
     REQUIRE(fmt_string_view(buf.data(), buf.size()) == "    ");
 
     buf.clear();
     {
-        mylog::sinks::filler filler(1, s_info, buf);
+        learnlog::sinks::filler filler(1, s_info, buf);
         filler.fill_msg(n);
     }
     REQUIRE(fmt_string_view(buf.data(), buf.size()) == " 1  ");
 
     buf.clear();
     {
-        mylog::sinks::filler filler(2, s_info, buf);
+        learnlog::sinks::filler filler(2, s_info, buf);
         filler.fill_msg(n);
     }
     REQUIRE(fmt_string_view(buf.data(), buf.size()) == " 01 ");
 
     buf.clear();
     {
-        mylog::sinks::filler filler(4, s_info, buf);
+        learnlog::sinks::filler filler(4, s_info, buf);
         filler.fill_msg(n);
     }
     REQUIRE(fmt_string_view(buf.data(), buf.size()) == "0001");
 }
 
 TEST_CASE("spaces_info", "[filler]") {
-    mylog::sinks::spaces_info s_info(4, spaces_info::fill_side::left, false);
+    learnlog::sinks::spaces_info s_info(4, spaces_info::fill_side::left, false);
     int n = 1;
     unsigned int n_trunc = 1111;
 
     fmt_memory_buf buf;
     {
-        mylog::sinks::filler filler(1, s_info, buf);
+        learnlog::sinks::filler filler(1, s_info, buf);
         filler.fill_msg(n);
     }
     REQUIRE(fmt_string_view(buf.data(), buf.size()) == "   1");
@@ -52,7 +52,7 @@ TEST_CASE("spaces_info", "[filler]") {
     buf.clear();
     s_info.side_ = spaces_info::fill_side::right;
     {
-        mylog::sinks::filler filler(1, s_info, buf);
+        learnlog::sinks::filler filler(1, s_info, buf);
         filler.fill_msg(n);
     }
     REQUIRE(fmt_string_view(buf.data(), buf.size()) == "1   ");
@@ -60,7 +60,7 @@ TEST_CASE("spaces_info", "[filler]") {
     buf.clear();
     s_info.side_ = spaces_info::fill_side::center;
     {
-        mylog::sinks::filler filler(1, s_info, buf);
+        learnlog::sinks::filler filler(1, s_info, buf);
         filler.fill_msg(n);
     }
     REQUIRE(fmt_string_view(buf.data(), buf.size()) == " 1  ");
@@ -70,7 +70,7 @@ TEST_CASE("spaces_info", "[filler]") {
     // 若 参数msg_len > 实际msg_len，可能会截断 msg ；
     buf.clear();
     {
-        mylog::sinks::filler filler(0, s_info, buf);
+        learnlog::sinks::filler filler(0, s_info, buf);
         filler.fill_msg(n_trunc);
     }
     REQUIRE(fmt_string_view(buf.data(), buf.size()) == "  1111  ");
@@ -79,14 +79,14 @@ TEST_CASE("spaces_info", "[filler]") {
     s_info.truncate_ = true;
     s_info.target_len_ = 2;
     {
-        mylog::sinks::filler filler(6, s_info, buf);
+        learnlog::sinks::filler filler(6, s_info, buf);
         filler.fill_msg(n_trunc);
     }
     REQUIRE(fmt_string_view(buf.data(), buf.size()) == "00");
 
     buf.clear();
     {
-        mylog::sinks::filler filler(4, s_info, buf);
+        learnlog::sinks::filler filler(4, s_info, buf);
         filler.fill_msg(n_trunc);
     }
     REQUIRE(fmt_string_view(buf.data(), buf.size()) == "11");
@@ -94,26 +94,26 @@ TEST_CASE("spaces_info", "[filler]") {
 
 
 TEST_CASE("fill_msg", "[filler]") {
-    mylog::sinks::spaces_info s_info(6, spaces_info::fill_side::center, false);
+    learnlog::sinks::spaces_info s_info(6, spaces_info::fill_side::center, false);
     fmt_memory_buf buf;
     int n = 2024;
     
     {
-        mylog::sinks::filler filler(5, s_info, buf);
+        learnlog::sinks::filler filler(5, s_info, buf);
         filler.fill_msg(static_cast<short>(-n));
     }
     REQUIRE(fmt_string_view(buf.data(), buf.size()) == "-2024 ");
 
     buf.clear();
     {
-        mylog::sinks::filler filler(6, s_info, buf);
+        learnlog::sinks::filler filler(6, s_info, buf);
         filler.fill_msg(static_cast<unsigned long long>(n));
     }
     REQUIRE(fmt_string_view(buf.data(), buf.size()) == "002024");
     
     buf.clear();
     {
-        mylog::sinks::filler filler(4, s_info, buf);
+        learnlog::sinks::filler filler(4, s_info, buf);
         filler.fill_msg(std::to_string(n));
     }
     REQUIRE(fmt_string_view(buf.data(), buf.size()) == " 2024 ");

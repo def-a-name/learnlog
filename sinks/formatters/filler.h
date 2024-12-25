@@ -5,7 +5,7 @@
 
 #include <string>
 
-namespace mylog {
+namespace learnlog {
 namespace sinks {
 
 // 空格填充信息
@@ -101,4 +101,4 @@ private:
 };
 
 }    // namespace sinks
-}    // namespace mylog
+}    // namespace learnlog

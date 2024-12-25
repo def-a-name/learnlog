@@ -6,7 +6,7 @@
 #include "sync_factory.h"
 #include "base/null_mutex.h"
 
-namespace mylog {
+namespace learnlog {
 namespace sinks {
 
 // basic_sink 的派生类，
@@ -25,10 +25,10 @@ public:
           max_file_num_(max_file_num) 
     {
         if (max_file_size == 0) {
-            throw_mylog_excpt("mylog::rolling_file_sink: max_file_size equals 0");
+            throw_learnlog_excpt("learnlog::rolling_file_sink: max_file_size equals 0");
         }
         if (max_file_num_ > 10000) {
-            throw_mylog_excpt("mylog::rolling_file_sink: max_file_num_ exceeds 10000");
+            throw_learnlog_excpt("learnlog::rolling_file_sink: max_file_num_ exceeds 10000");
         }
         
         // 找到当前文件路径下不引起冲突的最小文件编号，且保证编号范围是 [1, max_file_num_]
@@ -119,7 +119,7 @@ using rolling_file_sink_st = rolling_file_sink<base::null_mutex>;
 
 // factory 函数，创建使用 rolling_file_sink 的 logger 对象
 
-template <typename Factory = mylog::sync_factory>
+template <typename Factory = learnlog::sync_factory>
 logger_shr_ptr rolling_file_logger_mt(const std::string& logger_name,
                                       const filename_t& base_filename,
                                       size_t max_file_size,
@@ -130,7 +130,7 @@ logger_shr_ptr rolling_file_logger_mt(const std::string& logger_name,
                                                                  max_file_num);
 }
 
-template <typename Factory = mylog::sync_factory>
+template <typename Factory = learnlog::sync_factory>
 logger_shr_ptr rolling_file_logger_st(const std::string& logger_name,
                                       const filename_t& base_filename,
                                       size_t max_file_size,
@@ -141,4 +141,4 @@ logger_shr_ptr rolling_file_logger_st(const std::string& logger_name,
                                                                  max_file_num);
 }
 
-}   // namespace mylog
+}   // namespace learnlog

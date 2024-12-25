@@ -18,7 +18,7 @@
     #include <stdio.h>
 #endif  // _WIN32
 
-namespace mylog {
+namespace learnlog {
 namespace sinks {
 
 // sink 的派生类，
@@ -33,13 +33,13 @@ public:
 
     explicit std_sink(FILE* file) : mutex_(StaticMutex::mutex()), 
                                     file_(file), 
-                                    formatter_(mylog::make_unique<pattern_formatter>()) {
+                                    formatter_(learnlog::make_unique<pattern_formatter>()) {
 #ifdef _WIN32
         handle_ = reinterpret_cast<HANDLE>(::_get_osfhandle(::_fileno(file_)));
         // 如果 FILE* 既不是 stdout 也不是 stderr，且 handle_ 为无效句柄，才抛出异常，终止程序
         if (file != stdout && file != stderr && handle_ == INVALID_HANDLE_VALUE) {
             source_loc loc{__FILE__, __LINE__, __func__};
-            throw_mylog_excpt("mylog::std_sink: invalid FILE*, get HANDLE failed", 
+            throw_learnlog_excpt("learnlog::std_sink: invalid FILE*, get HANDLE failed", 
                                 base::os::get_errno(), loc);
         }
 #endif  // _WIN32
@@ -69,7 +69,7 @@ public:
 
         if (bytes_written != wbuf_size) {
             source_loc loc{__FILE__, __LINE__, __func__};
-            throw_mylog_excpt("mylog::std_sink: WriteConsoleW() failed", 
+            throw_learnlog_excpt("learnlog::std_sink: WriteConsoleW() failed", 
                                 base::os::get_errno(), loc);
         }
 #else
@@ -80,7 +80,7 @@ public:
 
         if (bytes_written != buf.size()) {
             source_loc loc{__FILE__, __LINE__, __func__};
-            throw_mylog_excpt("mylog::std_sink: fwrite() failed", 
+            throw_learnlog_excpt("learnlog::std_sink: fwrite() failed", 
                                 base::os::get_errno(), loc);
         }
 #endif
@@ -94,7 +94,7 @@ public:
 
     void set_pattern(const std::string& pattern) override {
         std::lock_guard<mutex_t> lock(mutex_);
-        formatter_ = mylog::make_unique<pattern_formatter>(pattern);
+        formatter_ = learnlog::make_unique<pattern_formatter>(pattern);
     }
 
     void set_formatter(formatter_uni_ptr formatter) override {
@@ -133,24 +133,24 @@ using stderr_sink_st = stderr_sink<base::static_nullmutex>;
 
 // factory 函数，创建使用 std_sink 的 logger 对象
 
-template <typename Factory = mylog::sync_factory>
+template <typename Factory = learnlog::sync_factory>
 logger_shr_ptr stdout_logger_mt(const std::string& logger_name) {
     return Factory::template create<sinks::stdout_sink_mt>(logger_name);
 }
 
-template <typename Factory = mylog::sync_factory>
+template <typename Factory = learnlog::sync_factory>
 logger_shr_ptr stdout_logger_st(const std::string& logger_name) {
     return Factory::template create<sinks::stdout_sink_st>(logger_name);
 }
 
-template <typename Factory = mylog::sync_factory>
+template <typename Factory = learnlog::sync_factory>
 logger_shr_ptr stderr_logger_mt(const std::string& logger_name) {
     return Factory::template create<sinks::stderr_sink_mt>(logger_name);
 }
 
-template <typename Factory = mylog::sync_factory>
+template <typename Factory = learnlog::sync_factory>
 logger_shr_ptr stderr_logger_st(const std::string& logger_name) {
     return Factory::template create<sinks::stderr_sink_st>(logger_name);
 }
 
-}   // namespace mylog
+}   // namespace learnlog

@@ -6,7 +6,7 @@
 #include <mutex>
 #include <condition_variable>
 
-namespace mylog {
+namespace learnlog {
 namespace base {
 
 // 在生命周期内，新增一个线程，该线程每隔一段时间 interval 执行函数 func，
@@ -52,4 +52,4 @@ private:
 };
 
 }   // namespace base
-}   // namespace mylog
+}   // namespace learnlog

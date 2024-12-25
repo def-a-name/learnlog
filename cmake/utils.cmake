@@ -1,7 +1,7 @@
 # copy from spdlog
 # Turn on warnings on the given target
 function(spdlog_enable_warnings target_name)
-    if(MYLOG_BUILD_WARNINGS)
+    if(LEARNLOG_BUILD_WARNINGS)
         if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
             list(APPEND MSVC_OPTIONS "/W3")
             if(MSVC_VERSION GREATER 1900) # Allow non fatal security warnings for msvc 2015

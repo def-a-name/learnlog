@@ -3,7 +3,7 @@
 #include "definitions.h"
 #include "base/exception.h"
 
-namespace mylog {
+namespace learnlog {
 namespace base {
 
 inline int utf8_to_wcharbuf(const char* ustr, int ustr_size, fmt_wmemory_buf& wbuf) {
@@ -23,8 +23,8 @@ inline int utf8_to_wcharbuf(const char* ustr, int ustr_size, fmt_wmemory_buf& wb
 inline void utf8buf_to_wcharbuf(const fmt_memory_buf& ubuf, size_t& color_start, size_t& color_end, 
                                 fmt_wmemory_buf& wbuf) {
     if (ubuf.size() > static_cast<size_t>(INT_MAX - 1)) {
-        throw_mylog_excpt(
-            "mylog::wchar_support: UTF-8 string is too long to be converted to WCHAR");
+        throw_learnlog_excpt(
+            "learnlog::wchar_support: UTF-8 string is too long to be converted to WCHAR");
     }
     if (ubuf.size() == 0) {
         wbuf.resize(0);
@@ -51,10 +51,10 @@ inline void utf8buf_to_wcharbuf(const fmt_memory_buf& ubuf, size_t& color_start,
 
     if (wchars_to_write != wbuf.size()) {
         source_loc loc{__FILE__, __LINE__, __func__};
-        throw_mylog_excpt("mylog::wchar_support: MultiByteToWideChar() failed", ::GetLastError(), loc);
+        throw_learnlog_excpt("learnlog::wchar_support: MultiByteToWideChar() failed", ::GetLastError(), loc);
     }
 }
 
 }   // namespace base
-}   // namespace mylog
+}   // namespace learnlog
 

@@ -1,13 +1,13 @@
 #include <catch2/catch_all.hpp>
 #include "base/fmt_base.h"
 
-using mylog::fmt_string_view;
-using mylog::fmt_memory_buf;
+using learnlog::fmt_string_view;
+using learnlog::fmt_memory_buf;
 
 template <typename T>
 void test_append_int(T n, const char* expected) {
     fmt_memory_buf buf;
-    mylog::base::fmt_base::append_int(n, buf);
+    learnlog::base::fmt_base::append_int(n, buf);
     
     REQUIRE(fmt_string_view(buf.data(), buf.size()) == expected);
 }
@@ -15,14 +15,14 @@ void test_append_int(T n, const char* expected) {
 template <typename T>
 void test_fill_uint(T n, size_t fill_len, const char* expected) {
     fmt_memory_buf buf;
-    mylog::base::fmt_base::fill_uint(n, fill_len, buf);
+    learnlog::base::fmt_base::fill_uint(n, fill_len, buf);
 
     REQUIRE(fmt_string_view(buf.data(), buf.size()) == expected);
 }
 
 template <typename T>
 void test_count_digits(T n, size_t expected) {
-    REQUIRE(mylog::base::fmt_base::count_unsigned_digits(n) == expected);
+    REQUIRE(learnlog::base::fmt_base::count_unsigned_digits(n) == expected);
 }
 
 

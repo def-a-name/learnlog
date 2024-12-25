@@ -7,7 +7,7 @@
 
 #include <mutex>
 
-namespace mylog {
+namespace learnlog {
 
 template <async_overflow_method Overflow>
 struct async_factory_template {
@@ -29,7 +29,7 @@ struct async_factory_template {
         try {
             base::registry::instance().initialize_logger(new_logger);
         }
-        MYLOG_CATCH
+        LEARNLOG_CATCH
         
         return new_logger;
     }
@@ -38,4 +38,4 @@ struct async_factory_template {
 using async_factory = async_factory_template<async_overflow_method::block_wait>;
 using async_factory_override_old = async_factory_template<async_overflow_method::override_old>;
 
-}   // namespace mylog
+}   // namespace learnlog

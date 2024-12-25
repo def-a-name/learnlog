@@ -8,7 +8,7 @@
 #include <vector>
 #include <atomic>
 
-namespace mylog {
+namespace learnlog {
 
 // 所有 logger 的基类，
 // 用户的调用指令最先经由 logger 处理，logger 根据用户传入的各式参数生成消息结构体 log_msg，
@@ -232,7 +232,7 @@ protected:
             base::log_msg log_msg(loc, level, fmt_string_view(buf.data(), buf.size()), name_);
             do_log_(log_msg, log_enabled, backtrace_enabled);
         }
-        MYLOG_CATCH
+        LEARNLOG_CATCH
     }
 
     void do_log_(const base::log_msg& msg, bool log_enabled, bool backtrace_enabled);
@@ -242,4 +242,4 @@ protected:
 
 void swap(logger& a, logger& b);
 
-}   // namespace mylog
+}   // namespace learnlog

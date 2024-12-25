@@ -7,7 +7,7 @@
 
 #include <array>
 
-namespace mylog {
+namespace learnlog {
 namespace sinks {
 
 // 处理格式化字符的基类，格式化 log_msg 并填充空格使格式对齐
@@ -523,4 +523,4 @@ private:
 };
 
 }    // namespace sinks
-}    // namespace mylog
+}    // namespace learnlog

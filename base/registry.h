@@ -10,7 +10,7 @@
 #include <functional>
 #include <mutex>
 
-namespace mylog {
+namespace learnlog {
 class logger;
 
 namespace base {
@@ -47,7 +47,7 @@ public:
     void flush_every(std::chrono::duration<Rep, Period> interval) {
         auto func = [this] { this->flush_all(); };
         std::lock_guard<std::mutex> lock(flusher_mutex_);
-        global_flusher_ = mylog::make_unique<periodic_function>(func, interval);
+        global_flusher_ = learnlog::make_unique<periodic_function>(func, interval);
     }
 
     void initialize_thread_pool(size_t msg_queue_size, size_t thread_num);
@@ -80,4 +80,4 @@ private:
 };
 
 }   // namespace base
-}   // namespace mylog
+}   // namespace learnlog

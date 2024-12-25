@@ -1,14 +1,14 @@
 #include <catch2/catch_all.hpp>
-#include "mylog.h"
+#include "learnlog.h"
 #include "logger.h"
 #include "async_logger.h"
 #include "sinks/ostream_sink.h"
 
 TEST_CASE("backtrace_default", "[backtracer]") {
     std::ostringstream oss;
-    auto oss_sink = std::make_shared<mylog::sinks::ostream_sink_st>(oss);
-    auto oss_logger = std::make_shared<mylog::logger>("backtrace test logger", oss_sink);
-    oss_logger->set_log_level(mylog::level::info);
+    auto oss_sink = std::make_shared<learnlog::sinks::ostream_sink_st>(oss);
+    auto oss_logger = std::make_shared<learnlog::logger>("backtrace test logger", oss_sink);
+    oss_logger->set_log_level(learnlog::level::info);
     oss_logger->set_pattern("%v");
     
     for (int i = 0; i < 100; i++) {
@@ -21,9 +21,9 @@ TEST_CASE("backtrace_default", "[backtracer]") {
 
 TEST_CASE("backtrace_sync", "[backtracer]") {
     std::ostringstream oss;
-    auto oss_sink = std::make_shared<mylog::sinks::ostream_sink_st>(oss);
-    auto oss_logger = std::make_shared<mylog::logger>("backtrace test logger", oss_sink);
-    oss_logger->set_log_level(mylog::level::info);
+    auto oss_sink = std::make_shared<learnlog::sinks::ostream_sink_st>(oss);
+    auto oss_logger = std::make_shared<learnlog::logger>("backtrace test logger", oss_sink);
+    oss_logger->set_log_level(learnlog::level::info);
     oss_logger->set_pattern("%v");
     oss_logger->enable_backtrace_n(5);
     
@@ -60,22 +60,22 @@ TEST_CASE("backtrace_sync", "[backtracer]") {
 }
 
 TEST_CASE("backtrace_async", "[backtracer]") {
-    mylog::initialize_thread_pool(1024, 1);
-    std::weak_ptr<mylog::base::thread_pool> tp(mylog::get_thread_pool());
+    learnlog::initialize_thread_pool(1024, 1);
+    std::weak_ptr<learnlog::base::thread_pool> tp(learnlog::get_thread_pool());
 
     std::ostringstream oss;
-    auto oss_sink = std::make_shared<mylog::sinks::ostream_sink_st>(oss);
-    auto oss_async_logger = std::make_shared<mylog::async_logger>("backtrace test logger",
+    auto oss_sink = std::make_shared<learnlog::sinks::ostream_sink_st>(oss);
+    auto oss_async_logger = std::make_shared<learnlog::async_logger>("backtrace test logger",
                                                                   oss_sink,
                                                                   tp);
-    oss_async_logger->set_log_level(mylog::level::info);
+    oss_async_logger->set_log_level(learnlog::level::info);
     oss_async_logger->set_pattern("%v");
     oss_async_logger->enable_backtrace_n(3);
     
     for (int i = 0; i < 1000; i++) {
         oss_async_logger->debug("debug {}", i);
     }
-    mylog::base::os::sleep_for_ms(100);
+    learnlog::base::os::sleep_for_ms(100);
 
     REQUIRE(oss.str().empty());
     oss_async_logger->dump_backtrace();
@@ -85,6 +85,6 @@ TEST_CASE("backtrace_async", "[backtracer]") {
         "debug 998" DEFAULT_EOL
         "debug 999" DEFAULT_EOL
         "************************ Backtrace End ************************" DEFAULT_EOL;
-    mylog::base::os::sleep_for_ms(100);
+    learnlog::base::os::sleep_for_ms(100);
     REQUIRE(oss.str() == expected);
 }

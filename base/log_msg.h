@@ -2,7 +2,7 @@
 
 #include "definitions.h"
 
-namespace mylog {
+namespace learnlog {
 namespace base {
 
 // 保存日志信息的底层结构体
@@ -37,4 +37,4 @@ struct log_msg {
 };
 
 }   // namespace base
-}   // namespace mylog
+}   // namespace learnlog

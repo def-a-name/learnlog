@@ -3,7 +3,7 @@
 #include "definitions.h"
 #include "base/exception.h"
 
-namespace mylog {
+namespace learnlog {
 namespace base {
 namespace file_base {
 
@@ -13,8 +13,8 @@ void close(FILE** fpp, const filename_t& fname) {
         if (::fclose(*fpp) != 0) {
             source_loc loc{__FILE__, __LINE__, __func__};
             std::string fname_str(fname.begin(), fname.end());
-            std::string err_str = fmt::format("mylog::file_base::close() failed, filename: '{}'", fname_str);
-            throw_mylog_excpt(err_str, os::get_errno(), loc);
+            std::string err_str = fmt::format("learnlog::file_base::close() failed, filename: '{}'", fname_str);
+            throw_learnlog_excpt(err_str, os::get_errno(), loc);
         }
         
         *fpp = nullptr;
@@ -55,8 +55,8 @@ void open(FILE** fpp, const filename_t& fname, bool truncate = false,
 
     source_loc loc{__FILE__, __LINE__, __func__};
     std::string fname_str(fname.begin(), fname.end());
-    std::string err_str = fmt::format("mylog::file_base::open() failed, filename: '{}'", fname_str);
-    throw_mylog_excpt(err_str, os::get_errno(), loc);
+    std::string err_str = fmt::format("learnlog::file_base::open() failed, filename: '{}'", fname_str);
+    throw_learnlog_excpt(err_str, os::get_errno(), loc);
 }
 
 // 刷新文件流缓冲区
@@ -64,8 +64,8 @@ inline void flush(FILE* fp, const filename_t& fname) {
     if (::fflush(fp) != 0) {
         source_loc loc{__FILE__, __LINE__, __func__};
         std::string fname_str(fname.begin(), fname.end());
-        std::string err_str = fmt::format("mylog::file_base::flush() failed, filename: '{}'", fname_str);
-        throw_mylog_excpt(err_str, os::get_errno(), loc);
+        std::string err_str = fmt::format("learnlog::file_base::flush() failed, filename: '{}'", fname_str);
+        throw_learnlog_excpt(err_str, os::get_errno(), loc);
     }
 }
 
@@ -74,8 +74,8 @@ inline void sync(FILE* fp, const filename_t& fname) {
     if (!os::fsync(fp)) {
         source_loc loc{__FILE__, __LINE__, __func__};
         std::string fname_str(fname.begin(), fname.end());
-        std::string err_str = fmt::format("mylog::file_base::sync() failed, filename: '{}'", fname_str);
-        throw_mylog_excpt(err_str, os::get_errno(), loc);
+        std::string err_str = fmt::format("learnlog::file_base::sync() failed, filename: '{}'", fname_str);
+        throw_learnlog_excpt(err_str, os::get_errno(), loc);
     }
 }
 
@@ -86,8 +86,8 @@ inline void write(FILE* fp, const filename_t& fname, const fmt_memory_buf& buf) 
     if (::fwrite(buf.data(), sizeof(char), buf.size(), fp) != buf.size()) {
         source_loc loc{__FILE__, __LINE__, __func__};
         std::string fname_str(fname.begin(), fname.end());
-        std::string err_str = fmt::format("mylog::file_base::write() failed, filename: '{}'", fname_str);
-        throw_mylog_excpt(err_str, os::get_errno(), loc);
+        std::string err_str = fmt::format("learnlog::file_base::write() failed, filename: '{}'", fname_str);
+        throw_learnlog_excpt(err_str, os::get_errno(), loc);
     }
 }
 
@@ -96,8 +96,8 @@ inline u_long_long size(FILE* fp, const filename_t& fname) {
     if (fp == nullptr) {
         std::string fname_str(fname.begin(), fname.end());
         std::string err_str = fmt::format(
-            "mylog::file_base::size() failed, fp == nullptr, filename: '{}'", fname_str);
-        throw_mylog_excpt(err_str);
+            "learnlog::file_base::size() failed, fp == nullptr, filename: '{}'", fname_str);
+        throw_learnlog_excpt(err_str);
     }
     
     long_long ret = os::filesize(fp);
@@ -105,8 +105,8 @@ inline u_long_long size(FILE* fp, const filename_t& fname) {
     if (ret == -1) {
         source_loc loc{__FILE__, __LINE__, __func__};
         std::string fname_str(fname.begin(), fname.end());
-        std::string err_str = fmt::format("mylog::file_base::size() failed, filename: '{}'", fname_str);
-        throw_mylog_excpt(err_str, os::get_errno(), loc);
+        std::string err_str = fmt::format("learnlog::file_base::size() failed, filename: '{}'", fname_str);
+        throw_learnlog_excpt(err_str, os::get_errno(), loc);
     }
     
     return static_cast<u_long_long>(ret);
@@ -124,4 +124,4 @@ size_t suffix_pos(const filename_t& fname) {
 
 }   // namespace file_base
 }   // namespace base
-}   // namespace mylog
+}   // namespace learnlog

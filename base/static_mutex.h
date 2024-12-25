@@ -3,7 +3,7 @@
 #include "base/null_mutex.h"
 #include <mutex>
 
-namespace mylog {
+namespace learnlog {
 namespace base {
 
 struct static_mutex {
@@ -23,4 +23,4 @@ struct static_nullmutex {
 };
 
 }    // namespace base
-}    // namespace mylog
+}    // namespace learnlog

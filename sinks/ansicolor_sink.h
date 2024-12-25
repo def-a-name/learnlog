@@ -6,7 +6,7 @@
 
 #include <mutex>
 
-namespace mylog {
+namespace learnlog {
 namespace sinks {
 
 // sink 的派生类，
@@ -22,7 +22,7 @@ public:
     
     explicit ansicolor_sink(FILE* file) : mutex_(StaticMutex::mutex()), 
                                           file_(file),
-                                          formatter_(mylog::make_unique<pattern_formatter>()) {
+                                          formatter_(learnlog::make_unique<pattern_formatter>()) {
         level_colors_.at(level::trace) = white;
         level_colors_.at(level::debug) = cyan;
         level_colors_.at(level::info) = green;
@@ -76,7 +76,7 @@ public:
 
         if (bytes_written != buf.size()) {
             source_loc loc{__FILE__, __LINE__, __func__};
-            throw_mylog_excpt("mylog::ansicolor_sink: fwrite() failed", errno, loc);
+            throw_learnlog_excpt("learnlog::ansicolor_sink: fwrite() failed", errno, loc);
         }
     }
 
@@ -87,7 +87,7 @@ public:
 
     void set_pattern(const std::string& pattern) override {
         std::lock_guard<mutex_t> lock(mutex_);
-        formatter_ = mylog::make_unique<pattern_formatter>(pattern);
+        formatter_ = learnlog::make_unique<pattern_formatter>(pattern);
     }
 
     void set_formatter(formatter_uni_ptr formatter) override {
@@ -100,7 +100,7 @@ private:
     FILE* file_;
     formatter_uni_ptr formatter_;
     bool is_color_enabled_;
-    std::array<std::string, MYLOG_LEVELS_NUM> level_colors_;
+    std::array<std::string, LEARNLOG_LEVELS_NUM> level_colors_;
 
     // 字体样式
     const std::string reset = "\033[m";
@@ -157,4 +157,4 @@ using stderr_ansicolor_sink_mt = stderr_ansicolor_sink<base::static_mutex>;
 using stderr_ansicolor_sink_st = stderr_ansicolor_sink<base::static_nullmutex>;
 
 }    // namespace sinks
-}    // namespace mylog
+}    // namespace learnlog

@@ -1,10 +1,10 @@
 cmake_minimum_required(VERSION 3.11)
-project(mylog_examples LANGUAGES CXX)
+project(learnlog_examples LANGUAGES CXX)
 
-if(NOT TARGET mylog)
+if(NOT TARGET learnlog)
     # Stand-alone build
-    find_package(mylog REQUIRED)
+    find_package(learnlog REQUIRED)
 endif()
 
 add_executable(example example.cpp)
-target_link_libraries(example PRIVATE mylog)
+target_link_libraries(example PRIVATE learnlog)

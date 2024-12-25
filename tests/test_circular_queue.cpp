@@ -1,7 +1,7 @@
 #include <catch2/catch_all.hpp>
 #include "base/circular_queue.h"
 
-using q_type = mylog::base::circular_queue<int>;
+using q_type = learnlog::base::circular_queue<int>;
 TEST_CASE("test_construct", "[circular_queue]")
 {
     q_type q1(9);

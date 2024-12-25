@@ -1,7 +1,7 @@
 #include "base/log_msg.h"
 #include "base/os.h"
 
-using namespace mylog;
+using namespace learnlog;
 using namespace base;
 
 log_msg::log_msg(sys_clock::time_point time_in,

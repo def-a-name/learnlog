@@ -2,7 +2,7 @@
 
 #include "definitions.h"
 
-namespace mylog {
+namespace learnlog {
 namespace base {
 namespace fmt_base {
 
@@ -81,4 +81,4 @@ Metric precise_time(sys_clock::time_point tp) {
 
 }   // namespace fmt_base
 }   // namespace base
-}   // namespace mylog
+}   // namespace learnlog

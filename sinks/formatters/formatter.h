@@ -3,7 +3,7 @@
 #include "definitions.h"
 #include "base/log_msg.h"
 
-namespace mylog {
+namespace learnlog {
 namespace sinks {
 
 // 格式化 log_msg 的基类，
@@ -16,4 +16,4 @@ public:
 };
 
 }    // namespace sinks
-}   // namespace mylog
+}   // namespace learnlog
