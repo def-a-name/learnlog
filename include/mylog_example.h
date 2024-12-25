@@ -6,8 +6,6 @@
 
 namespace mylog {
 
-void helloworld();
-
 void create_thread_pool();
 
 void handle_exception(const std::string& msg);

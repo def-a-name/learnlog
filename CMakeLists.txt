@@ -64,7 +64,6 @@ message(STATUS "Build type: " ${CMAKE_BUILD_TYPE})
 set(MYLOG_HEADERS_DIR "${CMAKE_CURRENT_SOURCE_DIR}/include")
 set(MYLOG_SRCS_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src")
 
-add_subdirectory(helloworld)
 add_subdirectory(base)
 add_subdirectory(sinks)
 
@@ -76,7 +75,7 @@ add_library(mylog::mylog ALIAS mylog)
 target_include_directories(mylog PUBLIC 
                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
                             $<BUILD_INTERFACE:${MYLOG_HEADERS_DIR}>)
-target_link_libraries(mylog mylog_helloworld mylog_base mylog_sinks)
+target_link_libraries(mylog mylog_base mylog_sinks)
 spdlog_enable_warnings(mylog)
 
 # ---------------------------------------------------------------------------------------

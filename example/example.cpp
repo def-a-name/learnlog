@@ -2,11 +2,9 @@
 
 int main(int argc, char* argv[])
 { 
-    mylog::helloworld();
-
     mylog::handle_exception("err");
 
-    // mylog::create_thread_pool();
+    mylog::create_thread_pool();
 
     mylog::fmt_memory_buf buf;
     

@@ -1,0 +1,23 @@
+# 编译结果
+[Dd]ebug/
+[Rr]elease/
+build/*
+*.o
+
+# 动态链接库
+*.so
+*.dll
+
+# 静态链接库
+*.a
+*.lib
+
+# 可执行文件
+*.exe
+*.out
+
+# Cmake 文件
+CMakeCache.txt
+CMakeFiles
+CMakeScripts
+Makefile

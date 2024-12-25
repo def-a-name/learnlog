@@ -67,8 +67,6 @@ function(mylog_prepare_test test_target test_srcs mylog_lib)
 endfunction()
 
 if(MYLOG_BUILD_TESTS)
-    mylog_prepare_test(mylog-utests-helloworld "${MYLOG_UTEST_HELLOWORLD_SOURCES}" mylog_helloworld)
-    
     mylog_prepare_test(mylog-utests-base "${MYLOG_UTEST_BASE_SOURCES}" mylog_base)
 
     mylog_prepare_test(mylog-utests-sinks "${MYLOG_UTEST_SINKS_SOURCES}" mylog)

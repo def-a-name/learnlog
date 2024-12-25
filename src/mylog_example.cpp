@@ -1,7 +1,6 @@
 #include "mylog_example.h"
 
 #include "base/exception.h"
-#include "helloworld/helloworld.h"
 #include "base/thread_pool.h"
 #include "logger.h"
 #include "sinks/formatters/pattern_formatter.h"
@@ -10,11 +9,6 @@
 #include "sinks/basic_file_sink.h"
 #include "sinks/rolling_file_sink.h"
 #include "mylog.h"
-
-void mylog::helloworld() {
-    hello_world();
-    fmt::print("Hello, {}!\n", "World");
-}
 
 void mylog::create_thread_pool() {
     mylog::base::thread_pool thread_pool(10, 10);
