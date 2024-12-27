@@ -4,6 +4,7 @@
 #include "base/fmt_base.h"
 
 #include <string>
+#include <type_traits>
 
 namespace learnlog {
 namespace sinks {

@@ -7,6 +7,7 @@
 #include <string>
 #include <atomic>
 #include <cassert>
+#include <iterator>
 
 // 处理异常，将异常的内容、产生位置（如果提供）组合成异常信息，
 // 传给 handle_excpt() 处理
