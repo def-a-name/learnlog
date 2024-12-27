@@ -72,7 +72,7 @@ public:
 
     // msg 的类型是无符号整数类型之一，可填充前缀0
     template <typename T,
-              typename std::enable_if<std::__is_unsigned_integer<const T>::value,
+              typename std::enable_if<is_unsigned_integral<const T>::value,
                                       int>::type = 0>
     void fill_msg(T n) {
         base::fmt_base::fill_uint(n, msg_len_, dest_buf_);
@@ -80,7 +80,7 @@ public:
 
     // msg 的类型是带符号整数类型之一，直接填充
     template <typename T,
-              typename std::enable_if<std::__is_signed_integer<const T>::value,
+              typename std::enable_if<is_signed_integral<const T>::value,
                                       int>::type = 1>
     void fill_msg(T n) {
         base::fmt_base::append_int(n, dest_buf_);
