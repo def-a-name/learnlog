@@ -30,7 +30,7 @@ public:
         if (max_file_num_ > 10000) {
             throw_learnlog_excpt("learnlog::rolling_file_sink: max_file_num_ exceeds 10000");
         }
-        
+
         // 找到当前文件路径下不引起冲突的最小文件编号，且保证编号范围是 [1, max_file_num_]
         for (file_index_ = 1; file_index_ < max_file_num_; ++file_index_) {
             if ( !base::os::dir_exist(get_rolling_filename(file_index_)) )
@@ -51,18 +51,35 @@ public:
     // 文件编号的长度由 max_file_num_ 的位数决定，填充前缀0，
     // 如 "test_log/log.txt" -> "test_log/log_01.txt"
     filename_t get_rolling_filename(size_t roll_index) {
-        fmt_memory_buf buf;
-
+#ifdef _WIN32
         size_t suffix_pos = base::file_base::suffix_pos(base_fname_);
-        base::fmt_base::append_string_view(base_fname_.substr(0, suffix_pos), buf);
+        std::string basename = base::wstring_to_string(base_fname_.substr(0, suffix_pos));
+        std::string suffix = base::wstring_to_string(base_fname_.substr(suffix_pos));
+
+        fmt_memory_buf buf;
+        base::fmt_base::append_string_view(basename, buf);
         base::fmt_base::append_string_view("_", buf);
-        
         size_t index_len = base::fmt_base::count_unsigned_digits(max_file_num_);
         base::fmt_base::fill_uint(roll_index, index_len, buf);
-        
-        base::fmt_base::append_string_view(base_fname_.substr(suffix_pos), buf);
+        base::fmt_base::append_string_view(suffix, buf);
+
+        fmt_wmemory_buf wbuf;
+        base::utf8buf_to_wcharbuf(buf, wbuf);
+        return filename_t{wbuf.data(), wbuf.size()};
+#else
+        size_t suffix_pos = base::file_base::suffix_pos(base_fname_);
+        std::string basename = base_fname_.substr(0, suffix_pos);
+        std::string suffix = base_fname_.substr(suffix_pos);
+
+        fmt_memory_buf buf;
+        base::fmt_base::append_string_view(basename, buf);
+        base::fmt_base::append_string_view("_", buf);
+        size_t index_len = base::fmt_base::count_unsigned_digits(max_file_num_);
+        base::fmt_base::fill_uint(roll_index, index_len, buf);
+        base::fmt_base::append_string_view(suffix, buf);
 
         return filename_t{buf.data(), buf.size()};
+#endif
     }
 
 private:

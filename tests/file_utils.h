@@ -4,6 +4,7 @@
 #include "base/file_base.h"
 #ifdef _WIN32
     #include "win.h"
+    #include "base/wchar_support.h"
 #endif
 
 #include <fstream>
@@ -18,8 +19,14 @@ void clean_test_tmp() {
 #endif
 }
 
-learnlog::u_long_long get_filesize(const std::string& filename) {
-    std::ifstream ifs(filename, std::ifstream::ate | std::ifstream::binary);
+learnlog::u_long_long get_filesize(const learnlog::filename_t& filename) {
+#ifdef _WIN32
+    std::ifstream ifs(learnlog::base::wstring_to_string(filename),
+                      std::ifstream::ate | std::ifstream::binary);
+#else
+    std::ifstream ifs(filename, 
+                      std::ifstream::ate | std::ifstream::binary);
+#endif
     if (!ifs) {
         throw std::runtime_error("Failed to create ifstream");
     }
@@ -46,8 +53,7 @@ std::string file_content(const learnlog::filename_t& filename) {
                        (std::istreambuf_iterator<char>()));
 }
 
-
-static void write_a_ntimes(FILE* fp, const std::string& filename, size_t ntimes) {
+static void write_a_ntimes(FILE* fp, const learnlog::filename_t& filename, size_t ntimes) {
     learnlog::fmt_memory_buf buf;
     fmt::format_to(std::back_inserter(buf), FMT_STRING("{}"), std::string(ntimes, 'a'));
     learnlog::base::file_base::write(fp, filename, buf);

@@ -7,6 +7,7 @@
 #include <algorithm>
 #include <sys/stat.h>
 #include <thread>
+#include <ctime>
 
 #ifdef _WIN32
     #include "win.h"
@@ -69,10 +70,10 @@ inline void time_point_to_datetime_nsec(char* dt_buf, size_t buf_len, const sys_
     std::tm tm = time_point_to_tm(tp);
     std::strftime(dt_buf, buf_len, "%Y-%m-%d %H:%M:%S.", &tm);
 
-    strcat(dt_buf, ns_str);
+    snprintf(dt_buf, buf_len, "%s%s", dt_buf, ns_str);
 }
 
-inline void sleep_for_ms(u_long_long ms) noexcept {
+inline void sleep_for_ms(unsigned int ms) noexcept {
 #ifdef _WIN32
     ::Sleep(ms);
 #else

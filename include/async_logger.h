@@ -64,7 +64,7 @@ private:
                 try {
                     future.get();
                 }
-                catch (const std::future_error& fe) {
+                catch (const std::future_error&) {
                     std::string err_str = 
                         fmt::format("learnlog::async_logger [{}]: flush message was dropped", logger::name_);
                     throw_learnlog_excpt(err_str);

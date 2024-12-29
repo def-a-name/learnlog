@@ -112,8 +112,22 @@ using remove_cvref_type = typename std::remove_cv<typename std::remove_reference
 template <typename T>
 struct is_convertible_to_basic_format_string
     : std::integral_constant<bool,
-                            std::is_convertible<T, fmt::basic_string_view<char> >::value ||
-                            std::is_same<remove_cvref_type<T>, fmt::runtime_format_string<char> >::value> {
+                             std::is_convertible<T, fmt::basic_string_view<char> >::value ||
+                             std::is_same<remove_cvref_type<T>, fmt::runtime_format_string<char> >::value> {
+};
+
+template <typename T>
+struct is_unsigned_integral
+    : std::integral_constant<bool,
+                             std::is_integral<T>::value &&
+                             std::is_unsigned<T>::value > {
+};
+
+template <typename T>
+struct is_signed_integral
+    : std::integral_constant<bool,
+                             std::is_integral<T>::value &&
+                             std::is_signed<T>::value > {
 };
 
 // 保存发生位置信息的结构体，代码文件名 -> 行号 -> 函数名

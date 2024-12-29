@@ -7,6 +7,7 @@
 #include <string>
 #include <atomic>
 #include <cassert>
+#include <iterator>
 
 // 处理异常，将异常的内容、产生位置（如果提供）组合成异常信息，
 // 传给 handle_excpt() 处理
@@ -25,7 +26,7 @@ namespace learnlog {
 // 通过 staic std::atomic 保证编号和时间的一致性、原子性
 inline void handle_excpt(const std::string& msg) {
     using tp = sys_clock::time_point;
-    static std::atomic<tp> last_report_time;
+    static std::atomic<tp> last_report_time{ tp(seconds(0)) };
     static std::atomic<size_t> report_cnt{1};
 
     tp now = sys_clock::now();

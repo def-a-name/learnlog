@@ -76,9 +76,14 @@ void learnlog::logger_helloworld() {
 }
 
 void learnlog::async_helloworld() {
+#ifdef _WIN32
+    filename_t fname(L"test_tmp/异步日志.txt");
+#else
+    filename_t fname("test_tmp/异步日志.txt");
+#endif
     auto async_logger = 
         learnlog::create_async<learnlog::sinks::rolling_file_sink_mt>("async_example", 
-                                                                      "test_tmp/async.txt",
+                                                                      fname,
                                                                       5 * 1024,
                                                                       10);
     learnlog::set_pattern("async_example", "thread [%t]: %v");

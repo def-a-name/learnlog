@@ -163,19 +163,19 @@ TEST_CASE("multithread", "[sinks]") {
         std::make_shared<learnlog::sinks::rolling_file_sink_mt>(R_FNAME, roll_size, roll_num);
 
     learnlog::logger mt_logger_1("multithread test logger 1", {oss_sink,
-                                                            stdout_sink,
-                                                            stdout_color_sink,
-                                                            basic_file_sink,
-                                                            rolling_file_sink});
+                                                               stdout_sink,
+                                                               stdout_color_sink,
+                                                               basic_file_sink,
+                                                               rolling_file_sink});
     mt_logger_1.set_log_level(learnlog::level::trace);
     mt_logger_1.set_pattern("");
     mt_logger_1.debug("");
     mt_logger_1.set_pattern("<%n> from thread %t");
     learnlog::logger mt_logger_2("multithread test logger 2", {oss_sink,
-                                                            stdout_sink,
-                                                            stdout_color_sink,
-                                                            basic_file_sink,
-                                                            rolling_file_sink});
+                                                               stdout_sink,
+                                                               stdout_color_sink,
+                                                               basic_file_sink,
+                                                               rolling_file_sink});
     mt_logger_2.set_log_level(learnlog::level::trace);
     auto func = [&mt_logger_1, &mt_logger_2](int i) { 
         if (i % 2 == 0) mt_logger_1.debug(""); 

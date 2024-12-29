@@ -73,12 +73,12 @@ public:
             level_color = level_color | (origin_color & 0xf0);  // 保留当前控制台的背景颜色
             set_text_color_(level_color);
             ::WriteConsoleW(handle_, wbuf.data() + msg.color_index_start, 
-                              msg.color_index_end - msg.color_index_start, &bytes, nullptr);
+                            msg.color_index_end - msg.color_index_start, &bytes, nullptr);
             bytes_written += bytes;
             set_text_color_(origin_color);
 
             ::WriteConsoleW(handle_, wbuf.data() + msg.color_index_end, 
-                              wbuf.size() - msg.color_index_end, &bytes, nullptr);
+                            wbuf.size() - msg.color_index_end, &bytes, nullptr);
             bytes_written += bytes;
         }
         else {
@@ -124,13 +124,13 @@ private:
     }
 
     // 设置当前控制台的字体颜色
-    bool set_text_color_(WORD color) {
+    BOOL set_text_color_(WORD color) {
         CONSOLE_SCREEN_BUFFER_INFO con_buf_info;  
         // 如果获取不到 console buffer info，不操作
         if(!::GetConsoleScreenBufferInfo(handle_, &con_buf_info)) {
             return false;
         }
-        return static_cast<bool>(::SetConsoleTextAttribute(handle_, color));
+        return ::SetConsoleTextAttribute(handle_, color);
     }
 };
 
