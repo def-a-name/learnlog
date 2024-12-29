@@ -8,7 +8,7 @@ namespace base {
 namespace file_base {
 
 // 关闭文件
-void close(FILE** fpp, const filename_t& fname) {
+inline void close(FILE** fpp, const filename_t& fname) {
     if (*fpp != nullptr) {
         if (::fclose(*fpp) != 0) {
             source_loc loc{__FILE__, __LINE__, __func__};
@@ -27,7 +27,7 @@ void close(FILE** fpp, const filename_t& fname) {
 // 打开文件时先创建父级目录，再创建文件流，
 // truncate 表示是否以覆写模式打开文件，默认为 false，
 // 如果 truncate 为 true，则先以 wb 模式创建文件，再重新以 ab 模式打开，避免已写入内容意外被清空
-void open(FILE** fpp, const filename_t& fname, bool truncate = false, 
+inline void open(FILE** fpp, const filename_t& fname, bool truncate = false, 
           int try_times = 5, unsigned int try_every_ms = 10) {
     file_base::close(fpp, fname);
 
@@ -113,7 +113,7 @@ inline u_long_long size(FILE* fp, const filename_t& fname) {
 }
 
 // 从文件路径中找到后缀名（如.txt）的起始位置，路径不包含后缀名时返回超尾位置
-size_t suffix_pos(const filename_t& fname) {
+inline size_t suffix_pos(const filename_t& fname) {
     size_t file_idx = fname.find_last_of(FOLDER_SPR);
     size_t suf_idx = fname.find_last_of('.');
     if (suf_idx <= file_idx + 1 || suf_idx == filename_t::npos) {

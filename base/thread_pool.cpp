@@ -36,7 +36,7 @@ thread_pool::thread_pool(size_t queue_size, size_t threads_num) :
 
 thread_pool::~thread_pool() {
     try {
-        for (int i = 0; i < threads_.size(); i++) {
+        for (size_t i = 0; i < threads_.size(); i++) {
             enqueue_async_msg_(async_msg(async_msg_type::terminate), 
                                async_overflow_method::block_wait);
         }
