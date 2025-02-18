@@ -1,11 +1,11 @@
 #include <catch2/catch_all.hpp>
-#include "base/mpmc_blocking_queue.h"
+#include "base/block_queue.h"
 #include "base/os.h"
 
 #include <iostream>
 #include <thread>
 
-using q_type = learnlog::base::mpmc_blocking_queue<int>;
+using q_type = learnlog::base::block_queue<int>;
 using std::chrono::milliseconds;
 using test_clock = std::chrono::high_resolution_clock;
 

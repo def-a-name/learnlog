@@ -15,27 +15,21 @@ public:
     async_logger(std::string logger_name,
                  It begin,
                  It end,
-                 std::weak_ptr<base::thread_pool> tp,
-                 async_overflow_method overflow_m = async_overflow_method::block_wait)
+                 std::weak_ptr<base::thread_pool> tp)
         : logger{std::move(logger_name), begin, end},
-          thread_pool_(std::move(tp)),
-          overflow_method_(overflow_m) {}
+          thread_pool_(std::move(tp)) {}
 
     async_logger(std::string logger_name,
                  sinks_init_list sinks_list,
-                 std::weak_ptr<base::thread_pool> tp,
-                 async_overflow_method overflow_m = async_overflow_method::block_wait)
+                 std::weak_ptr<base::thread_pool> tp)
         : logger{std::move(logger_name), sinks_list.begin(), sinks_list.end()},
-          thread_pool_(std::move(tp)),
-          overflow_method_(overflow_m) {}
+          thread_pool_(std::move(tp)) {}
 
     async_logger(std::string logger_name,
                  sink_shr_ptr single_sink,
-                 std::weak_ptr<base::thread_pool> tp,
-                 async_overflow_method overflow_m = async_overflow_method::block_wait)
+                 std::weak_ptr<base::thread_pool> tp)
         : logger{std::move(logger_name), std::move(single_sink)},
-          thread_pool_(std::move(tp)),
-          overflow_method_(overflow_m) {}
+          thread_pool_(std::move(tp)) {}
 
     logger_shr_ptr clone(std::string new_name) override {
         auto cloned = std::make_shared<async_logger>(*this);
@@ -47,7 +41,7 @@ private:
     void sink_log_(const base::log_msg& msg) override {
         try {
             if (auto tp_ptr = thread_pool_.lock()) {
-                tp_ptr->enqueue_log(shared_from_this(), msg, overflow_method_);
+                tp_ptr->enqueue_log(shared_from_this(), msg);
             }
             else {
                 throw_learnlog_excpt(
@@ -60,7 +54,7 @@ private:
     void flush_sink_() override {
         try {
             if (auto tp_ptr = thread_pool_.lock()) {
-                std::future<void> future = tp_ptr->enqueue_flush(shared_from_this(), overflow_method_);
+                std::future<void> future = tp_ptr->enqueue_flush(shared_from_this());
                 try {
                     future.get();
                 }
@@ -101,7 +95,6 @@ private:
     }
 
     std::weak_ptr<base::thread_pool> thread_pool_;
-    async_overflow_method overflow_method_;
 };
 
 }   // namespace learnlog

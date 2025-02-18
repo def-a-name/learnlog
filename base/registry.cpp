@@ -155,11 +155,6 @@ void registry::remove_all() {
     default_logger_.reset();
 }
 
- void registry::initialize_thread_pool(size_t msg_queue_size, size_t thread_num) {
-    auto tp = std::make_shared<base::thread_pool>(msg_queue_size, thread_num);
-    register_thread_pool(std::move(tp));
-}
-
 void registry::register_thread_pool(thread_pool_shr_ptr new_thread_pool) {
     std::lock_guard<std::mutex> lock(thread_mutex_);
     thread_pool_ = std::move(new_thread_pool);

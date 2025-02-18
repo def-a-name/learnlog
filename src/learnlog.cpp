@@ -88,10 +88,6 @@ void learnlog::remove_all() {
     base::registry::instance().remove_all();
 }
 
-void learnlog::initialize_thread_pool(size_t msg_queue_size, size_t thread_num) {
-    base::registry::instance().initialize_thread_pool(msg_queue_size, thread_num);
-}
-
 void learnlog::register_thread_pool(thread_pool_shr_ptr new_thread_pool) {
     base::registry::instance().register_thread_pool(std::move(new_thread_pool));
 }

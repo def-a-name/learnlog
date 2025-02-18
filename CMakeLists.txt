@@ -36,7 +36,7 @@ option(LEARNLOG_BUILD_TESTS "Build tests" OFF)
 option(LEARNLOG_SANITIZE_ADDRESS "Enable address sanitizer in tests" ON)
 
 # bench options
-option(LEARNLOG_BUILD_BENCH "Build benchmarks (Requires https://github.com/google/benchmark.git to be installed)" OFF)
+option(LEARNLOG_BUILD_BENCH "Build benchmarks" OFF)
 
 # ---------------------------------------------------------------------------------------
 # Package support

@@ -4,8 +4,6 @@ int main(int argc, char* argv[])
 { 
     learnlog::handle_exception("err");
 
-    learnlog::create_thread_pool();
-
     learnlog::fmt_memory_buf buf;
     
     learnlog::filler_helloworld(buf);

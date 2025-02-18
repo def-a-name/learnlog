@@ -10,10 +10,6 @@
 #include "sinks/rolling_file_sink.h"
 #include "learnlog.h"
 
-void learnlog::create_thread_pool() {
-    learnlog::base::thread_pool thread_pool(10, 10);
-}
-
 void learnlog::handle_exception(const std::string& msg) {
     learnlog::source_loc s;
     try {
@@ -84,11 +80,27 @@ void learnlog::async_helloworld() {
     auto async_logger = 
         learnlog::create_async<learnlog::sinks::rolling_file_sink_mt>("async_example", 
                                                                       fname,
-                                                                      5 * 1024,
+                                                                      10 * 1024,
                                                                       10);
-    learnlog::set_pattern("async_example", "thread [%t]: %v");
-    for (int i = 0; i < base::default_queue_size * 2; i++) {
-        async_logger->info("hello world #{}", i);
+    learnlog::set_pattern("async_example", "thread [%t]: <%T.%F> %v");
+
+    size_t total_msg = base::default_queue_size * 2;
+    size_t thread_cnt = 16;
+    size_t msg_per_thread = total_msg / thread_cnt;
+
+    auto thread_func = [&async_logger, msg_per_thread] {
+        for (size_t i = 0; i < msg_per_thread; i++) {
+            async_logger->info("#{}", i);
+        }
+    };
+
+    std::vector<std::thread> threads;
+    for (size_t i = 0; i < thread_cnt; i++) {
+        threads.emplace_back(thread_func);
     }
+    for (auto& t : threads) {
+        t.join();
+    }
+
     learnlog::flush_every(learnlog::milliseconds(500));
 }

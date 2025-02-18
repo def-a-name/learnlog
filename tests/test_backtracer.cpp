@@ -60,14 +60,12 @@ TEST_CASE("backtrace_sync", "[backtracer]") {
 }
 
 TEST_CASE("backtrace_async", "[backtracer]") {
-    learnlog::initialize_thread_pool(1024, 1);
-    std::weak_ptr<learnlog::base::thread_pool> tp(learnlog::get_thread_pool());
-
+    auto tp = std::make_shared<learnlog::base::lock_thread_pool>(1024, 1);
     std::ostringstream oss;
     auto oss_sink = std::make_shared<learnlog::sinks::ostream_sink_st>(oss);
     auto oss_async_logger = std::make_shared<learnlog::async_logger>("backtrace test logger",
-                                                                  oss_sink,
-                                                                  tp);
+                                                                     oss_sink,
+                                                                     tp);
     oss_async_logger->set_log_level(learnlog::level::info);
     oss_async_logger->set_pattern("%v");
     oss_async_logger->enable_backtrace_n(3);

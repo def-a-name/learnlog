@@ -50,7 +50,12 @@ public:
         global_flusher_ = learnlog::make_unique<periodic_function>(func, interval);
     }
 
-    void initialize_thread_pool(size_t msg_queue_size, size_t thread_num);
+    template <typename Threadpool>
+    void initialize_thread_pool(size_t msg_queue_size, size_t thread_num) {
+        auto tp = std::make_shared<Threadpool>(msg_queue_size, thread_num);
+        register_thread_pool(std::move(tp));
+    }
+    
     void register_thread_pool(thread_pool_shr_ptr new_thread_pool);
     thread_pool_shr_ptr get_thread_pool();
 

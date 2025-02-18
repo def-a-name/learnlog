@@ -105,7 +105,11 @@ void remove_all();
 // 初始化异步模式（async_logger）需要的线程池，
 // msg_queue_size 是日志消息缓冲区的大小，thread_num 是用于输出日志的线程数量，
 // 完成后自动调用 register_thread_pool() 注册
-void initialize_thread_pool(size_t msg_queue_size, size_t thread_num);
+template <typename Threadpool>
+void initialize_thread_pool(size_t msg_queue_size, size_t thread_num) {
+    base::registry::instance().initialize_thread_pool<Threadpool>(msg_queue_size, 
+                                                                  thread_num);
+}
 
 // 注册异步模式（async_logger）需要的线程池
 void register_thread_pool(thread_pool_shr_ptr new_thread_pool);
@@ -140,12 +144,6 @@ template <typename Sink, typename... SinkArgs>
 async_logger_shr_ptr create_async(std::string logger_name, SinkArgs &&...sink_args) {
     return async_factory::create<Sink>(std::move(logger_name), 
                                        std::forward<SinkArgs>(sink_args)...);
-}
-
-template <typename Sink, typename... SinkArgs>
-async_logger_shr_ptr create_async_nonblock(std::string logger_name, SinkArgs &&...sink_args) {
-    return async_factory_override_old::create<Sink>(std::move(logger_name), 
-                                                    std::forward<SinkArgs>(sink_args)...);
 }
 
 /* 以下是调用默认 logger 记录日志的接口，支持多种输入 */

@@ -29,15 +29,12 @@ inline void handle_excpt(const std::string& msg) {
     static std::atomic<tp> last_report_time{ tp(seconds(0)) };
     static std::atomic<size_t> report_cnt{1};
 
+    tp lr_time = last_report_time.load(std::memory_order_acquire);
     tp now = sys_clock::now();
     size_t cnt = report_cnt.fetch_add(1);
-
-    tp lr_time = last_report_time.load(std::memory_order_relaxed);
     assert( now - lr_time > std::chrono::nanoseconds(1) );
-    // if(now - lr_time < std::chrono::seconds(1)){
-    //     return;
-    // }
-    last_report_time.store(now, std::memory_order_relaxed);
+    // if(now - lr_time < std::chrono::seconds(1)){ return; }
+    last_report_time.store(now, std::memory_order_release);
 
     char dt_buf[32];
     base::os::time_point_to_datetime_sec(dt_buf, sizeof(dt_buf), now);

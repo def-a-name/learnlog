@@ -1,4 +1,4 @@
-# copy from spdlog
+# From spdlog https://github.com/gabime/spdlog/blob/v1.x/cmake/utils.cmake
 # Turn on warnings on the given target
 function(spdlog_enable_warnings target_name)
     if(LEARNLOG_BUILD_WARNINGS)
@@ -22,7 +22,7 @@ function(spdlog_enable_warnings target_name)
     endif()
 endfunction()
 
-# copy from spdlog
+# From spdlog https://github.com/gabime/spdlog/blob/v1.x/cmake/utils.cmake
 # Enable address sanitizer (gcc/clang only)
 function(spdlog_enable_sanitizer target_name)
     if(NOT CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")

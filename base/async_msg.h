@@ -5,12 +5,6 @@
 
 namespace learnlog {
 
-enum async_overflow_method {
-    discard_new,
-    block_wait,
-    override_old
-};
-
 class async_logger;
 
 namespace base {
@@ -33,18 +27,31 @@ public:
     // log
     async_msg(async_logger_shr_ptr&& logger_in, 
               async_msg_type type_in, 
-              const log_msg& msg_in);
+              const log_msg& msg_in)
+        : log_msg_buf{msg_in}, 
+        logger(std::move(logger_in)),
+        msg_type(type_in), 
+        flush_promise{} {}
 
     // flush
     async_msg(async_logger_shr_ptr&& logger_in, 
               async_msg_type type_in,
-              std::promise<void>&& promise_in);
+              std::promise<void>&& promise_in)
+        : log_msg_buf{}, 
+        logger(std::move(logger_in)),
+        msg_type(type_in), 
+        flush_promise{std::move(promise_in)} {}
 
     // terminate
     async_msg(async_logger_shr_ptr&& logger_in, 
-              async_msg_type type_in);
+              async_msg_type type_in)
+        : log_msg_buf{}, 
+        logger(std::move(logger_in)),
+        msg_type(type_in), 
+        flush_promise{} {}
 
-    explicit async_msg(async_msg_type type_in);
+    explicit async_msg(async_msg_type type_in)
+        : async_msg(nullptr, type_in) {}
 };
 
 }   // namespace base

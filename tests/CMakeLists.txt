@@ -37,6 +37,10 @@ set(LEARNLOG_UTEST_BASE_SOURCES
     test_periodic_function.cpp
 )
 
+set(LEARNLOG_UTEST_CONCURRENTQUEUE_SOURCES
+    test_concurrent_queue.cpp
+)
+
 set(LEARNLOG_UTEST_SINKS_SOURCES
     test_filler.cpp
     test_pattern_formatter.cpp
@@ -68,6 +72,8 @@ endfunction()
 
 if(LEARNLOG_BUILD_TESTS)
     learnlog_prepare_test(learnlog-utests-base "${LEARNLOG_UTEST_BASE_SOURCES}" learnlog_base)
+
+    learnlog_prepare_test(learnlog-utests-concurrentqueue "${LEARNLOG_UTEST_CONCURRENTQUEUE_SOURCES}" learnlog_base)
 
     learnlog_prepare_test(learnlog-utests-sinks "${LEARNLOG_UTEST_SINKS_SOURCES}" learnlog)
 
