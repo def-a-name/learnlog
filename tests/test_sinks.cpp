@@ -183,10 +183,10 @@ TEST_CASE("multithread", "[sinks]") {
     };
 
     std::vector<std::thread> threads;
-    int thread_num = 100;
-    int i = 0;
+    size_t thread_num = 100;
+    size_t i = 0;
     for (; i < thread_num; i++) {
-        threads.emplace_back(func, i);
+        threads.emplace_back(func, static_cast<int>(i));
     }
 
     i = 0;

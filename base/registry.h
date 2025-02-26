@@ -67,6 +67,7 @@ private:
     registry();
     ~registry();
     void register_logger_(logger_shr_ptr new_logger);
+    void remove_async_loggers_();
 
     std::mutex loggers_mutex_;
     formatter_uni_ptr global_formatter_;

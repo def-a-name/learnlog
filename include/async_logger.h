@@ -17,19 +17,25 @@ public:
                  It end,
                  std::weak_ptr<base::thread_pool> tp)
         : logger{std::move(logger_name), begin, end},
-          thread_pool_(std::move(tp)) {}
+          thread_pool_(std::move(tp)) {
+        logger::is_async_ = true;
+    }
 
     async_logger(std::string logger_name,
                  sinks_init_list sinks_list,
                  std::weak_ptr<base::thread_pool> tp)
         : logger{std::move(logger_name), sinks_list.begin(), sinks_list.end()},
-          thread_pool_(std::move(tp)) {}
+          thread_pool_(std::move(tp)) {
+        logger::is_async_ = true;
+    }
 
     async_logger(std::string logger_name,
                  sink_shr_ptr single_sink,
                  std::weak_ptr<base::thread_pool> tp)
         : logger{std::move(logger_name), std::move(single_sink)},
-          thread_pool_(std::move(tp)) {}
+          thread_pool_(std::move(tp)) {
+        logger::is_async_ = true;
+    }
 
     logger_shr_ptr clone(std::string new_name) override {
         auto cloned = std::make_shared<async_logger>(*this);

@@ -14,7 +14,7 @@ namespace sinks {
 template <typename Mutex>
 class null_sink final : public basic_sink<Mutex> {
 protected:
-    void output_(const base::log_msg &msg) override {}
+    void output_(const base::log_msg &) override {}
     void flush_() override {}
 };
 

@@ -5,26 +5,21 @@
 using namespace learnlog;
 using namespace base;
 
-thread_pool::thread_pool(size_t queue_size, size_t threads_num, 
+thread_pool::thread_pool(size_t queue_size, msg_queue_type q_type,
+                         size_t threads_num, 
                          const std::function<void()>& on_thread_start,
                          const std::function<void()>& on_thread_stop) :
     msg_q_size_(queue_size),
+    msg_q_type_(q_type),
+    threads_num_(threads_num),
     start_func_(on_thread_start),
     stop_func_(on_thread_stop)
 {
-    if(threads_num <= 0 || threads_num > 1024) {
+    if(threads_num_ <= 0 || threads_num_ > 1024) {
         std::string err_str = 
             fmt::format("learnlog::thread_pool(): invalid threads_num {:d} "
-                        "(valid range is 1-1024)", threads_num);
+                        "(valid range is 1-1024)", threads_num_);
         throw_learnlog_excpt(err_str);
-    }
-    
-    for (size_t i = 0; i < threads_num; ++i) {
-        threads_.emplace_back([this] {
-            start_func_();
-            this->thread_pool::worker_loop_();
-            stop_func_();
-        });
     }
 }
 

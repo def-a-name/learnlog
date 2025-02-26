@@ -89,7 +89,10 @@ void learnlog::remove_all() {
 }
 
 void learnlog::register_thread_pool(thread_pool_shr_ptr new_thread_pool) {
-    base::registry::instance().register_thread_pool(std::move(new_thread_pool));
+    try {
+        base::registry::instance().register_thread_pool(std::move(new_thread_pool));
+    }
+    LEARNLOG_CATCH
 }
 
 thread_pool_shr_ptr learnlog::get_thread_pool() {

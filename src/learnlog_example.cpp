@@ -77,24 +77,70 @@ void learnlog::async_helloworld() {
 #else
     filename_t fname("test_tmp/异步日志.txt");
 #endif
-    auto async_logger = 
-        learnlog::create_async<learnlog::sinks::rolling_file_sink_mt>("async_example", 
-                                                                      fname,
-                                                                      10 * 1024,
-                                                                      10);
-    learnlog::set_pattern("async_example", "thread [%t]: <%T.%F> %v");
-
+    learnlog::set_global_pattern("thread [%t]: <%T.%F> %v");
     size_t total_msg = base::default_queue_size * 2;
     size_t thread_cnt = 16;
     size_t msg_per_thread = total_msg / thread_cnt;
+    std::vector<std::thread> threads;
 
-    auto thread_func = [&async_logger, msg_per_thread] {
+    // learnlog::initialize_thread_pool<learnlog::base::lock_thread_pool>(32768,
+    //                                                                    4);
+    // auto async_logger = 
+    //     learnlog::create_async<learnlog::sinks::rolling_file_sink_mt>("async_example", 
+    //                                                                   fname,
+    //                                                                   10 * 1024,
+    //                                                                   10);
+    // auto thread_func = [&async_logger, msg_per_thread] {
+    //     for (size_t i = 0; i < msg_per_thread; i++) {
+    //         async_logger->info("#{}", i);
+    //     }
+    // };
+    // for (size_t i = 0; i < thread_cnt; i++) {
+    //     threads.emplace_back(thread_func);
+    // }
+    // for (auto& t : threads) {
+    //     t.join();
+    // }
+   
+    // threads.clear();
+    // learnlog::initialize_thread_pool<learnlog::base::lockfree_thread_pool>(32768,
+    //                                                                        4);
+    // async_logger = learnlog::create_async_lockfree<learnlog::sinks::rolling_file_sink_mt>(
+    //     "async_lockfree_example", 
+    //     fname,
+    //     10 * 1024,
+    //     20
+    // );
+    // for (size_t i = 0; i < thread_cnt; i++) {
+    //     threads.emplace_back(thread_func);
+    // }
+    // for (auto& t : threads) {
+    //     t.join();
+    // }
+
+    // threads.clear();
+    // learnlog::initialize_thread_pool<learnlog::base::lockfree_concurrent_thread_pool>(32768,
+    //                                                                                   4);
+    // auto async_logger = learnlog::create_async_lockfree_concurrent<learnlog::sinks::rolling_file_sink_mt>(
+    //     "async_lockfree_concurrent_example", 
+    //     fname,
+    //     10 * 1024,
+    //     30
+    // );
+    auto thread_pool = std::make_shared<learnlog::base::lockfree_thread_pool>(32768, 1);
+    // learnlog::initialize_thread_pool<learnlog::base::lockfree_concurrent_thread_pool>(32768, 1);
+    // auto thread_pool = learnlog::get_thread_pool();
+    auto sink = std::make_shared<learnlog::sinks::basic_file_sink_mt>(fname, true);
+    auto logger = std::make_shared<async_logger>("async_lockfree_concurrent_example", 
+                               std::move(sink),
+                               std::move(thread_pool));
+    logger->set_pattern("thread [%t]: <%T.%F> %v");
+
+    auto thread_func = [&logger, msg_per_thread] {
         for (size_t i = 0; i < msg_per_thread; i++) {
-            async_logger->info("#{}", i);
+            logger->info("#{}", i);
         }
     };
-
-    std::vector<std::thread> threads;
     for (size_t i = 0; i < thread_cnt; i++) {
         threads.emplace_back(thread_func);
     }

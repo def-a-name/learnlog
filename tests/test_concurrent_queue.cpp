@@ -107,11 +107,11 @@ void mpmc_concurrent_queue(concurrent_queue& q, size_t thread_enqueue_size,
     size_t read_interval_ms = 20;
     
     std::atomic<bool> enqueue_finished{false};
-    std::atomic<int> enqueue_cnt{0};
+    std::atomic<size_t> enqueue_cnt{0};
     auto write_func = [&] {
         moodycamel::ProducerToken p_token(q);   
 
-        for (size_t i = 0; i < thread_enqueue_size; i++) {
+        for (int i = 0; i < static_cast<int>(thread_enqueue_size); i++) {
             if (token_type != no_token) {
                 while (!q.try_enqueue(p_token, std::move(i)))
                     continue;
@@ -129,7 +129,7 @@ void mpmc_concurrent_queue(concurrent_queue& q, size_t thread_enqueue_size,
         }
     };
 
-    std::vector<int> dequeue_cnts(thread_enqueue_size);
+    std::vector<size_t> dequeue_cnts(thread_enqueue_size);
     auto read_func = [&] {
         moodycamel::ConsumerToken c_token(q);
 
@@ -158,10 +158,10 @@ void mpmc_concurrent_queue(concurrent_queue& q, size_t thread_enqueue_size,
     for (size_t i = 0; i < write_thread_num; i++) {
         threads.emplace_back(write_func);
     }
-    for (int i = 0; i < read_thread_num; i++) {
+    for (size_t i = 0; i < read_thread_num; i++) {
         threads.emplace_back(read_func);
     }
-    int thread_cnt = 0;
+    size_t thread_cnt = 0;
     for (auto& t : threads) {
         t.join();
         thread_cnt++;
@@ -183,7 +183,7 @@ void mpmc_bind_concurrent_queue(concurrent_queue& q, size_t thread_enqueue_size,
     size_t read_interval_ms = 5;
     
     std::atomic<bool> enqueue_finished{false};
-    std::atomic<int> enqueue_cnt{0};
+    std::atomic<size_t> enqueue_cnt{0};
     std::vector<std::shared_ptr<moodycamel::ProducerToken> > p_tokens;
     std::mutex p_tokens_mutex;
     auto write_func = [&] {
@@ -193,7 +193,7 @@ void mpmc_bind_concurrent_queue(concurrent_queue& q, size_t thread_enqueue_size,
             p_tokens.push_back(p_token);
         }
 
-        for (size_t i = 0; i < thread_enqueue_size; i++) {
+        for (int i = 0; i < static_cast<int>(thread_enqueue_size); i++) {
             while (!q.try_enqueue(*p_token, std::move(i)))
                     continue;
             enqueue_cnt++;
@@ -205,8 +205,8 @@ void mpmc_bind_concurrent_queue(concurrent_queue& q, size_t thread_enqueue_size,
         }
     };
 
-    std::vector<int> dequeue_cnts(thread_enqueue_size);
-    std::atomic<int> dequeue_cnt{0};
+    std::vector<size_t> dequeue_cnts(thread_enqueue_size);
+    std::atomic<size_t> dequeue_cnt{0};
     std::atomic<size_t> p_tokens_idx{0};
     auto read_func = [&] {
         auto p_token = p_tokens[p_tokens_idx.fetch_add(1, std::memory_order_relaxed)];
@@ -227,10 +227,10 @@ void mpmc_bind_concurrent_queue(concurrent_queue& q, size_t thread_enqueue_size,
     for (size_t i = 0; i < thread_num; i++) {
         threads.emplace_back(write_func);
     }
-    for (int i = 0; i < thread_num; i++) {
+    for (size_t i = 0; i < thread_num; i++) {
         threads.emplace_back(read_func);
     }
-    int thread_cnt = 0;
+    size_t thread_cnt = 0;
     for (auto& t : threads) {
         t.join();
         thread_cnt++;
@@ -252,10 +252,9 @@ void mpmc_block_concurrent_queue_notoken(block_concurrent_queue& q,
     size_t read_interval_ms = 5;
     
     std::atomic<bool> enqueue_finished{false};
-    std::atomic<int> enqueue_cnt{0};
+    std::atomic<size_t> enqueue_cnt{0};
     auto write_func = [&] {
-
-        for (size_t i = 0; i < thread_enqueue_size; i++) {
+        for (int i = 0; i < static_cast<int>(thread_enqueue_size); i++) {
             while (!q.try_enqueue(std::move(i)))
                     continue;
             enqueue_cnt++;
@@ -267,7 +266,7 @@ void mpmc_block_concurrent_queue_notoken(block_concurrent_queue& q,
         }
     };
 
-    std::vector<int> dequeue_cnts(thread_enqueue_size);
+    std::vector<size_t> dequeue_cnts(thread_enqueue_size);
     auto read_func = [&] {
         int item;
         while (true) {
@@ -284,10 +283,10 @@ void mpmc_block_concurrent_queue_notoken(block_concurrent_queue& q,
     for (size_t i = 0; i < write_thread_num; i++) {
         threads.emplace_back(write_func);
     }
-    for (int i = 0; i < read_thread_num; i++) {
+    for (size_t i = 0; i < read_thread_num; i++) {
         threads.emplace_back(read_func);
     }
-    int thread_cnt = 0;
+    size_t thread_cnt = 0;
     for (auto& t : threads) {
         t.join();
         thread_cnt++;
@@ -332,7 +331,6 @@ TEST_CASE("concurrent_queue_mpmc", "[concurrent_queue]") {
 }
 
 TEST_CASE("block_concurrent_queue_mpmc", "[concurrent_queue]") { 
-    const size_t BLOCK_SIZE = 32;
     size_t q_size = 1024;
     
     size_t write_thread_num = 2;

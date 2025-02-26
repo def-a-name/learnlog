@@ -39,7 +39,7 @@ public:
         if(!spaces_info_.enabled()) return;     // 如果 spaces_info 信息无效则不填充空格
         
         spaces_.resize(MAX_SPACES_LEN, ' ');        // 最大空格填充数为 MAX_SPACES_LEN
-        spaces_to_fill_ = spaces_info_.target_len_ - msg_len;
+        spaces_to_fill_ = static_cast<int>(spaces_info_.target_len_ - msg_len);
         if(spaces_to_fill_ <= 0) return;
 
         if(spaces_info_.side_ == spaces_info::fill_side::left) {
@@ -49,7 +49,7 @@ public:
         else if(spaces_info_.side_ == spaces_info::fill_side::center) {
             size_t half_to_fill = spaces_to_fill_ / 2;
             fill_spaces_(half_to_fill);
-            spaces_to_fill_ -= half_to_fill;
+            spaces_to_fill_ = static_cast<int>(spaces_to_fill_ - half_to_fill);
         }
     }
 

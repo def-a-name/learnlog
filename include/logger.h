@@ -195,17 +195,19 @@ public:
     const std::vector<sink_shr_ptr>& sinks() const { return sinks_; }
     std::vector<sink_shr_ptr>& sinks() { return sinks_; }
     const std::string& name() const { return name_;}
+    bool is_async() { return is_async_; }
 
     // 借助 make_shared 复制出新的 logger 对象，并返回共享指针
     virtual logger_shr_ptr clone(std::string new_name);
 
 protected:
-    std::string name_;                              
-    std::vector<sink_shr_ptr> sinks_;               
-    level::level_enum log_level_ = level::info;     
-    level::level_enum flush_level_ = level::off;    
-    std::string pattern_ = "%+";                    
-    std::shared_ptr<base::backtracer> tracer_;      
+    std::string name_;
+    std::vector<sink_shr_ptr> sinks_;
+    std::shared_ptr<base::backtracer> tracer_;
+    level::level_enum log_level_ = level::info;
+    level::level_enum flush_level_ = level::off;
+    std::string pattern_ = "%+";
+    bool is_async_ = false;  
 
     bool should_log_(level::level_enum msg_level) const {
         return msg_level >= log_level_;

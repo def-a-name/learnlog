@@ -146,6 +146,21 @@ async_logger_shr_ptr create_async(std::string logger_name, SinkArgs &&...sink_ar
                                        std::forward<SinkArgs>(sink_args)...);
 }
 
+template <typename Sink, typename... SinkArgs>
+async_logger_shr_ptr create_async_lockfree(std::string logger_name, 
+                                           SinkArgs &&...sink_args) {
+    return async_factory_lockfree::create<Sink>(std::move(logger_name), 
+                                                std::forward<SinkArgs>(sink_args)...);
+}
+
+template <typename Sink, typename... SinkArgs>
+async_logger_shr_ptr create_async_lockfree_concurrent(std::string logger_name, 
+                                                      SinkArgs &&...sink_args) {
+    return 
+        async_factory_lockfree_concurrent::create<Sink>(std::move(logger_name), 
+                                                        std::forward<SinkArgs>(sink_args)...);
+}
+
 /* 以下是调用默认 logger 记录日志的接口，支持多种输入 */
 
 template <typename... Args>

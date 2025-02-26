@@ -157,6 +157,8 @@ void registry::remove_all() {
 
 void registry::register_thread_pool(thread_pool_shr_ptr new_thread_pool) {
     std::lock_guard<std::mutex> lock(thread_mutex_);
+    thread_pool_.reset();
+    remove_async_loggers_();
     thread_pool_ = std::move(new_thread_pool);
 }
 
@@ -203,4 +205,20 @@ void registry::register_logger_(logger_shr_ptr new_logger) {
         throw_learnlog_excpt(err_str);
     }
     loggers_[logger_name] = std::move(new_logger);
+}
+
+void registry::remove_async_loggers_() {
+    std::lock_guard<std::mutex> lock(loggers_mutex_);
+    std::vector<std::string> async_names;
+    for (auto &l : loggers_) {
+        if (l.second->is_async()) {
+            async_names.emplace_back(l.first);
+        }
+    }
+    for (auto &name : async_names) {
+        loggers_.erase(name);
+    }
+    if (default_logger_ && default_logger_->is_async()) {
+        default_logger_.reset();
+    }
 }

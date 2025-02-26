@@ -23,20 +23,23 @@ if(NOT CMAKE_CXX_STANDARD)
     set(CMAKE_CXX_STANDARD_REQUIRED ON)
 endif()
 
-# warning options
-option(LEARNLOG_BUILD_WARNINGS "Enable compiler warnings" OFF)
-
 # example options
 option(LEARNLOG_BUILD_EXAMPLES "Build examples" ON)
+
+# warning options
+option(LEARNLOG_BUILD_WARNINGS "Enable compiler warnings" OFF)
 
 # test options
 option(LEARNLOG_BUILD_TESTS "Build tests" OFF)
 
-# sanitizer options
-option(LEARNLOG_SANITIZE_ADDRESS "Enable address sanitizer in tests" ON)
-
 # bench options
 option(LEARNLOG_BUILD_BENCH "Build benchmarks" OFF)
+
+# sanitizer options
+option(LEARNLOG_SANITIZE_ADDRESS "Enable address sanitizer" OFF)
+
+# tls options
+option(LEARNLOG_USE_TLS "Use thread local storage" ON)
 
 # ---------------------------------------------------------------------------------------
 # Package support
@@ -75,8 +78,23 @@ add_library(learnlog::learnlog ALIAS learnlog)
 target_include_directories(learnlog PUBLIC 
                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
                             $<BUILD_INTERFACE:${LEARNLOG_HEADERS_DIR}>)
-target_link_libraries(learnlog learnlog_base learnlog_sinks)
+target_link_libraries(learnlog PUBLIC fmt::fmt)
+target_link_libraries(learnlog PUBLIC learnlog_base learnlog_sinks)
+if(LEARNLOG_SANITIZE_ADDRESS)
+    spdlog_enable_sanitizer(learnlog)
+endif()
 spdlog_enable_warnings(learnlog)
+
+# ---------------------------------------------------------------------------------------
+# Compile options
+# ---------------------------------------------------------------------------------------
+foreach(
+    LEARNLOG_OPTION
+    LEARNLOG_USE_TLS)
+    if(${LEARNLOG_OPTION})
+        target_compile_definitions(learnlog PRIVATE ${LEARNLOG_OPTION})
+    endif()
+endforeach()
 
 # ---------------------------------------------------------------------------------------
 # Build binaries

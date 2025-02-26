@@ -115,7 +115,7 @@ double bench_mpsc_lock_q(int q_size, int thread_cnt, int msg_cnt) {
     int msg_cnt_per_thread = msg_cnt / thread_cnt;
 
     auto write_func = [&] {
-        for (size_t i = 0; i < msg_cnt_per_thread; i++) {
+        for (int i = 0; i < msg_cnt_per_thread; i++) {
             item_t msg;
             q.enqueue(std::move(msg));
         }
@@ -138,7 +138,7 @@ double bench_mpsc_lock_q(int q_size, int thread_cnt, int msg_cnt) {
     auto start_tp = learnlog::sys_clock::now();
     
     std::vector<std::thread> threads;
-    for (size_t i = 0; i < thread_cnt; i++) {
+    for (int i = 0; i < thread_cnt; i++) {
         threads.emplace_back(write_func);
     }
     threads.emplace_back(read_func);
@@ -156,7 +156,7 @@ double bench_mpsc_block_concurrent_q(int q_size, int thread_cnt, int msg_cnt, to
     int msg_cnt_per_thread = msg_cnt / thread_cnt;
 
     auto write_func = [&] {
-        for (size_t i = 0; i < msg_cnt_per_thread; i++) {
+        for (int i = 0; i < msg_cnt_per_thread; i++) {
             item_t msg;
             while (!q.try_enqueue(std::move(msg)))
                 learnlog::base::os::sleep_for_ms(1);    // 避免死锁
@@ -190,7 +190,7 @@ double bench_mpsc_block_concurrent_q(int q_size, int thread_cnt, int msg_cnt, to
     auto start_tp = learnlog::sys_clock::now();
     
     std::vector<std::thread> threads;
-    for (size_t i = 0; i < thread_cnt; i++) {
+    for (int i = 0; i < thread_cnt; i++) {
         threads.emplace_back(write_func);
     }
     threads.emplace_back(read_func);
@@ -208,7 +208,7 @@ double bench_mpsc_concurrent_q(int q_size, int thread_cnt, int msg_cnt, token_t 
     int msg_cnt_per_thread = msg_cnt / thread_cnt;
 
     auto write_func = [&] {
-        for (size_t i = 0; i < msg_cnt_per_thread; i++) {
+        for (int i = 0; i < msg_cnt_per_thread; i++) {
             item_t msg;
             while (!q.try_enqueue(std::move(msg)))
                 learnlog::base::os::sleep_for_ms(1);    // 避免死锁
@@ -242,7 +242,7 @@ double bench_mpsc_concurrent_q(int q_size, int thread_cnt, int msg_cnt, token_t 
     auto start_tp = learnlog::sys_clock::now();
     
     std::vector<std::thread> threads;
-    for (size_t i = 0; i < thread_cnt; i++) {
+    for (int i = 0; i < thread_cnt; i++) {
         threads.emplace_back(write_func);
     }
     threads.emplace_back(read_func);
@@ -257,18 +257,18 @@ double bench_mpsc_concurrent_q(int q_size, int thread_cnt, int msg_cnt, token_t 
 double bench_mpmc_concurrent_q(int q_size, int thread_cnt, int msg_cnt) {
     using item_t = learnlog::base::async_msg;
     moodycamel::ConcurrentQueue<item_t> q(static_cast<size_t>(q_size));
-    std::vector<moodycamel::ProducerToken*> p_tokens;
+    std::vector<std::shared_ptr<moodycamel::ProducerToken> > p_tokens;
     std::mutex p_tokens_mutex;
     int msg_cnt_per_thread = msg_cnt / thread_cnt;
 
     auto write_func = [&] {
-        auto p_token = new moodycamel::ProducerToken(q);
+        auto p_token = std::make_shared<moodycamel::ProducerToken>(q);
         {
             std::lock_guard<std::mutex> lock(p_tokens_mutex);
             p_tokens.push_back(p_token);
         }
 
-        for (size_t i = 0; i < msg_cnt_per_thread; i++) {
+        for (int i = 0; i < msg_cnt_per_thread; i++) {
             item_t msg;
             while (!q.try_enqueue(*p_token, std::move(msg)))
                 continue;
@@ -281,7 +281,7 @@ double bench_mpmc_concurrent_q(int q_size, int thread_cnt, int msg_cnt) {
         size_t p_token_idx = p_tokens_idx.fetch_add(1, std::memory_order_relaxed);
         while (p_token_idx >= p_tokens.size())
             continue;
-        moodycamel::ProducerToken* p_token = nullptr;
+        std::shared_ptr<moodycamel::ProducerToken> p_token;
         {
             std::lock_guard<std::mutex> lock(p_tokens_mutex);
             p_token = p_tokens[p_token_idx];
@@ -302,10 +302,10 @@ double bench_mpmc_concurrent_q(int q_size, int thread_cnt, int msg_cnt) {
     auto start_tp = learnlog::sys_clock::now();
     
     std::vector<std::thread> threads;
-    for (size_t i = 0; i < thread_cnt; i++) {
+    for (int i = 0; i < thread_cnt; i++) {
         threads.emplace_back(write_func);
     }
-    for (size_t i = 0; i < thread_cnt; i++) {
+    for (int i = 0; i < thread_cnt; i++) {
         threads.emplace_back(read_func);
     }
     for (auto& t : threads) {

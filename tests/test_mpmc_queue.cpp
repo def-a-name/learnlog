@@ -87,7 +87,7 @@ enum enqueue_mode : int {
     enqueue_nowait
 };
 
-int mpmc(q_type& q, size_t q_size, 
+size_t mpmc(q_type& q, size_t q_size, 
          size_t w_thread_num, size_t r_thread_num, 
          enqueue_mode mode) {
     std::vector<std::thread> threads;
@@ -113,12 +113,12 @@ int mpmc(q_type& q, size_t q_size,
             enqueue_cnt++;
             learnlog::base::os::sleep_for_ms(write_interval);
         }
-        if (enqueue_cnt.load() == enqueue_num) {
+        if (static_cast<size_t>(enqueue_cnt.load()) == enqueue_num) {
             finished.store(true);
         }
     };
 
-    std::atomic<int> dequeue_cnt{0};
+    std::atomic<size_t> dequeue_cnt{0};
     auto read_func = [&] {
         int item;
         while (true) {
@@ -135,10 +135,10 @@ int mpmc(q_type& q, size_t q_size,
     for (size_t i = 0; i < w_thread_num; i++) {
         threads.emplace_back(write_func);
     }
-    for (int i = 0; i < r_thread_num; i++) {
+    for (size_t i = 0; i < r_thread_num; i++) {
         threads.emplace_back(read_func);
     }
-    int thread_cnt = 0;
+    size_t thread_cnt = 0;
     for (auto& t : threads) {
         t.join();
         thread_cnt++;
@@ -154,7 +154,7 @@ TEST_CASE("multithread_enqueue_if_have_room", "[mpmc_blocking_q]") {
     size_t write_thread_num = 50;
     size_t read_thread_num = 50;
     
-    int dequeue_cnt = mpmc(q, q_size, write_thread_num, read_thread_num,
+    size_t dequeue_cnt = mpmc(q, q_size, write_thread_num, read_thread_num,
                            enqueue_mode::enqueue_if_have_room);
 
     std::cout << "discard elements count: " << q.get_discard_count() << std::endl;
@@ -168,7 +168,7 @@ TEST_CASE("multithread_enqueue", "[mpmc_blocking_q]") {
     size_t write_thread_num = 50;
     size_t read_thread_num = 50;
     
-    int dequeue_cnt = mpmc(q, q_size, write_thread_num, read_thread_num,
+    size_t dequeue_cnt = mpmc(q, q_size, write_thread_num, read_thread_num,
                            enqueue_mode::enqueue);
 
     REQUIRE(dequeue_cnt == q_size * write_thread_num);
@@ -182,7 +182,7 @@ TEST_CASE("multithread_enqueue_nowait", "[mpmc_blocking_q]") {
     size_t write_thread_num = 50;
     size_t read_thread_num = 50;
     
-    int dequeue_cnt = mpmc(q, q_size, write_thread_num, read_thread_num,
+    size_t dequeue_cnt = mpmc(q, q_size, write_thread_num, read_thread_num,
                            enqueue_mode::enqueue_nowait);
 
     std::cout << "override elements count: " << q.get_override_count() << std::endl;

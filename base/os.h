@@ -27,6 +27,12 @@
 
 #endif
 
+#ifdef LEARNLOG_USE_TLS
+    #if (defined(_MSC_VER) && _MSC_VER < 1900) || (defined(__MINGW32__) || defined(__MINGW64__) && defined(__WINPTHREADS_VERSION)) || (defined(__GNUC__) && __GNUC__ <= 4)
+        #define LEARNLOG_USE_TLS 0
+    #endif
+#endif
+
 namespace learnlog {
 namespace base {
 namespace os {
@@ -73,7 +79,7 @@ inline void time_point_to_datetime_nsec(char* dt_buf, size_t buf_len, const sys_
     snprintf(dt_buf, buf_len, "%s%s", dt_buf, ns_str);
 }
 
-inline void sleep_for_ms(unsigned int ms) noexcept {
+inline void sleep_for_ms(size_t ms) noexcept {
 #ifdef _WIN32
     ::Sleep(ms);
 #else
@@ -145,8 +151,12 @@ inline size_t _thread_id() noexcept {
 }
 
 inline size_t thread_id() noexcept {
+#ifdef LEARNLOG_USE_TLS
     static thread_local const size_t tid = os::_thread_id();
     return tid;
+#else
+    return os::_thread_id();
+#endif 
 }
 
 inline int get_errno() noexcept {
