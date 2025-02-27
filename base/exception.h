@@ -31,7 +31,7 @@ inline void handle_excpt(const std::string& msg) {
 
     tp lr_time = last_report_time.load(std::memory_order_acquire);
     tp now = sys_clock::now();
-    size_t cnt = report_cnt.fetch_add(1);
+    size_t cnt = report_cnt.fetch_add(1, std::memory_order_relaxed);
     assert( now - lr_time > std::chrono::nanoseconds(1) );
     // if(now - lr_time < std::chrono::seconds(1)){ return; }
     last_report_time.store(now, std::memory_order_release);

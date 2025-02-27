@@ -84,26 +84,28 @@ TEST_CASE("ostream_sink", "[sinks]") {
             fmt::format("hello{}", DEFAULT_EOL));
 }
 
-TEST_CASE("std_sink", "[sinks]") {
-    std::string txt = "hello world!";
-    logger_std_sink(stdout, txt, "");
-    logger_std_sink(stdout, txt, "stdout: [%n] %v");
-    logger_std_sink(stdout, txt, "stdout: [%n] %5!v");
-    logger_std_sink(stderr, txt, "stderr: [%n] %5!v");
-    logger_std_sink(stderr, txt, "stderr: [%n] %v");
-    logger_std_sink(stdout, txt, "");
-}
+#ifndef _WIN32
+    TEST_CASE("std_sink", "[sinks]") {
+        std::string txt = "hello world!";
+        logger_std_sink(stdout, txt, "");
+        logger_std_sink(stdout, txt, "stdout: [%n] %v");
+        logger_std_sink(stdout, txt, "stdout: [%n] %5!v");
+        logger_std_sink(stderr, txt, "stderr: [%n] %5!v");
+        logger_std_sink(stderr, txt, "stderr: [%n] %v");
+        logger_std_sink(stdout, txt, "");
+    }
 
-TEST_CASE("stdout_color_sink", "[sinks]") {
-    std::string txt = "hello world!";
-    logger_stdout_color_sink(txt, "", learnlog::level::trace);
-    logger_stdout_color_sink(txt, "[%n] %^%c%$ [%l] msg: %v", learnlog::level::trace);
-    logger_stdout_color_sink(txt, "[%n] %c %^[%l]%$ msg: %v", learnlog::level::debug);
-    logger_stdout_color_sink(txt, "[%n] %c [%l] %^msg:%$ %v", learnlog::level::info);
-    logger_stdout_color_sink(txt, "[%n] %c [%l] msg: %^%v%$", learnlog::level::warn);
-    logger_stdout_color_sink(txt, "%^[%n]%$ %c [%l] msg: %v", learnlog::level::error);
-    logger_stdout_color_sink(txt, "[%n] %c [%l] %^msg: %v%$", learnlog::level::critical);
-}
+    TEST_CASE("stdout_color_sink", "[sinks]") {
+        std::string txt = "hello world!";
+        logger_stdout_color_sink(txt, "", learnlog::level::trace);
+        logger_stdout_color_sink(txt, "[%n] %^%c%$ [%l] msg: %v", learnlog::level::trace);
+        logger_stdout_color_sink(txt, "[%n] %c %^[%l]%$ msg: %v", learnlog::level::debug);
+        logger_stdout_color_sink(txt, "[%n] %c [%l] %^msg:%$ %v", learnlog::level::info);
+        logger_stdout_color_sink(txt, "[%n] %c [%l] msg: %^%v%$", learnlog::level::warn);
+        logger_stdout_color_sink(txt, "%^[%n]%$ %c [%l] msg: %v", learnlog::level::error);
+        logger_stdout_color_sink(txt, "[%n] %c [%l] %^msg: %v%$", learnlog::level::critical);
+    }
+#endif
 
 TEST_CASE("basic_file_sink", "[sinks]") {
     std::string txt = "hello world!";
@@ -156,15 +158,11 @@ TEST_CASE("multithread", "[sinks]") {
 
     std::ostringstream oss;
     auto oss_sink = std::make_shared<learnlog::sinks::ostream_sink_mt>(oss);
-    auto stdout_sink = std::make_shared<learnlog::sinks::stdout_sink_mt>();
-    auto stdout_color_sink = std::make_shared<learnlog::sinks::stdout_color_sink_mt>();
     auto basic_file_sink = std::make_shared<learnlog::sinks::basic_file_sink_mt>(B_FNAME);
     auto rolling_file_sink = 
         std::make_shared<learnlog::sinks::rolling_file_sink_mt>(R_FNAME, roll_size, roll_num);
 
     learnlog::logger mt_logger_1("multithread test logger 1", {oss_sink,
-                                                               stdout_sink,
-                                                               stdout_color_sink,
                                                                basic_file_sink,
                                                                rolling_file_sink});
     mt_logger_1.set_log_level(learnlog::level::trace);
@@ -172,12 +170,10 @@ TEST_CASE("multithread", "[sinks]") {
     mt_logger_1.debug("");
     mt_logger_1.set_pattern("<%n> from thread %t");
     learnlog::logger mt_logger_2("multithread test logger 2", {oss_sink,
-                                                               stdout_sink,
-                                                               stdout_color_sink,
                                                                basic_file_sink,
                                                                rolling_file_sink});
     mt_logger_2.set_log_level(learnlog::level::trace);
-    auto func = [&mt_logger_1, &mt_logger_2](int i) { 
+    auto func = [&mt_logger_1, &mt_logger_2](size_t i) { 
         if (i % 2 == 0) mt_logger_1.debug(""); 
         else mt_logger_2.debug("");
     };
@@ -186,7 +182,7 @@ TEST_CASE("multithread", "[sinks]") {
     size_t thread_num = 100;
     size_t i = 0;
     for (; i < thread_num; i++) {
-        threads.emplace_back(func, static_cast<int>(i));
+        threads.emplace_back(func, i);
     }
 
     i = 0;

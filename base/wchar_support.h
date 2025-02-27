@@ -8,8 +8,12 @@ namespace base {
 
 // 由 std::string 生成对应的 std::wstring
 inline std::wstring string_to_wstring(const std::string& str) {
+    if (str.size() > static_cast<size_t>(INT_MAX - 1)) {
+        throw_learnlog_excpt(
+            "learnlog::wchar_support: string is too long to be converted to wstring");
+    }
     const char* ustr = str.c_str();
-    size_t ustr_size = str.size();
+    int ustr_size = static_cast<int>(str.size());
     if (ustr_size <= 0) return 0;
 
     int size_to_write = ::MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, 
@@ -23,7 +27,7 @@ inline std::wstring string_to_wstring(const std::string& str) {
         delete[] wstr;
     }
     
-    if (size_to_write != ret.size()) {
+    if (size_to_write != static_cast<int>(ret.size())) {
         source_loc loc{__FILE__, __LINE__, __func__};
         throw_learnlog_excpt("learnlog::wchar_support: string_to_wstring() failed", 
                              ::GetLastError(), loc);
@@ -34,8 +38,12 @@ inline std::wstring string_to_wstring(const std::string& str) {
 
 // 由 std::wstring 生成对应的 std::string
 inline std::string wstring_to_string(const std::wstring& str) {
+    if (str.size() > static_cast<size_t>(INT_MAX - 1)) {
+        throw_learnlog_excpt(
+            "learnlog::wchar_support: wstring is too long to be converted to string");
+    }
     const wchar_t* wstr = str.c_str();
-    size_t wstr_size = str.size();
+    int wstr_size = static_cast<int>(str.size());
     if (wstr_size <= 0) return 0;
 
     int size_to_write = ::WideCharToMultiByte(CP_UTF8, 0, 
@@ -51,7 +59,7 @@ inline std::string wstring_to_string(const std::wstring& str) {
         delete[] ustr;
     }
     
-    if (size_to_write != ret.size()) {
+    if (size_to_write != static_cast<int>(ret.size())) {
         source_loc loc{__FILE__, __LINE__, __func__};
         throw_learnlog_excpt("learnlog::wchar_support: wstring_to_string() failed", 
                              ::GetLastError(), loc);
@@ -123,10 +131,10 @@ inline void utf8buf_to_wcharbuf(const fmt_memory_buf& ubuf,
         color_end = new_color_end;
     }
     else {
-        wchars_to_write = utf8_to_wcharbuf_(ubuf.data(), ubuf.size(), wbuf);
+        wchars_to_write = utf8_to_wcharbuf_(ubuf.data(), static_cast<int>(ubuf.size()), wbuf);
     }
 
-    if (wchars_to_write != wbuf.size()) {
+    if (wchars_to_write != static_cast<int>(wbuf.size())) {
         source_loc loc{__FILE__, __LINE__, __func__};
         throw_learnlog_excpt("learnlog::wchar_support: utf8buf_to_wcharbuf() failed", 
                              ::GetLastError(), loc);
@@ -145,9 +153,9 @@ inline void utf8buf_to_wcharbuf(const fmt_memory_buf& ubuf,
         return;
     }
 
-    int wchars_to_write = utf8_to_wcharbuf_(ubuf.data(), ubuf.size(), wbuf);
+    int wchars_to_write = utf8_to_wcharbuf_(ubuf.data(), static_cast<int>(ubuf.size()), wbuf);
 
-    if (wchars_to_write != wbuf.size()) {
+    if (wchars_to_write != static_cast<int>(wbuf.size())) {
         source_loc loc{__FILE__, __LINE__, __func__};
         throw_learnlog_excpt("learnlog::wchar_support: utf8buf_to_wcharbuf() failed", 
                              ::GetLastError(), loc);
@@ -166,9 +174,9 @@ inline void wcharbuf_to_utf8buf(const fmt_wmemory_buf& wbuf,
         return;
     }
 
-    int chars_to_write = wchar_to_utf8buf_(wbuf.data(), wbuf.size(), ubuf);
+    int chars_to_write = wchar_to_utf8buf_(wbuf.data(), static_cast<int>(wbuf.size()), ubuf);
 
-    if (chars_to_write != ubuf.size()) {
+    if (chars_to_write != static_cast<int>(ubuf.size())) {
         source_loc loc{__FILE__, __LINE__, __func__};
         throw_learnlog_excpt("learnlog::wchar_support: wcharbuf_to_utf8buf() failed", 
                              ::GetLastError(), loc);

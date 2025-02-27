@@ -103,8 +103,8 @@ void mpmc_concurrent_queue(concurrent_queue& q, size_t thread_enqueue_size,
                           token_t token_type) {
     std::vector<std::thread> threads;
     size_t enqueue_num = thread_enqueue_size * write_thread_num;
-    size_t write_interval_ms = 10;
-    size_t read_interval_ms = 20;
+    size_t write_interval_ms = 5;
+    size_t read_interval_ms = 10;
     
     std::atomic<bool> enqueue_finished{false};
     std::atomic<size_t> enqueue_cnt{0};
@@ -120,7 +120,7 @@ void mpmc_concurrent_queue(concurrent_queue& q, size_t thread_enqueue_size,
                 while (!q.try_enqueue(std::move(i)))
                     continue;
             }
-            enqueue_cnt++;
+            ++enqueue_cnt;
             learnlog::base::os::sleep_for_ms(write_interval_ms);
         }
 
@@ -130,6 +130,7 @@ void mpmc_concurrent_queue(concurrent_queue& q, size_t thread_enqueue_size,
     };
 
     std::vector<size_t> dequeue_cnts(thread_enqueue_size);
+    std::mutex dequeue_cnts_mutex;
     auto read_func = [&] {
         moodycamel::ConsumerToken c_token(q);
 
@@ -146,7 +147,10 @@ void mpmc_concurrent_queue(concurrent_queue& q, size_t thread_enqueue_size,
                     dequeue_flag = q.try_dequeue(item);
             }
             if (dequeue_flag) {
-                ++dequeue_cnts[item];
+                {
+                    std::lock_guard<std::mutex> lock(dequeue_cnts_mutex);
+                    ++dequeue_cnts[item];
+                }
                 learnlog::base::os::sleep_for_ms(read_interval_ms);
             }
             else {
@@ -179,8 +183,8 @@ void mpmc_bind_concurrent_queue(concurrent_queue& q, size_t thread_enqueue_size,
 
     std::vector<std::thread> threads;
     size_t enqueue_num = thread_enqueue_size * thread_num;
-    size_t write_interval_ms = 10;
-    size_t read_interval_ms = 5;
+    size_t write_interval_ms = 5;
+    size_t read_interval_ms = 10;
     
     std::atomic<bool> enqueue_finished{false};
     std::atomic<size_t> enqueue_cnt{0};
@@ -196,7 +200,7 @@ void mpmc_bind_concurrent_queue(concurrent_queue& q, size_t thread_enqueue_size,
         for (int i = 0; i < static_cast<int>(thread_enqueue_size); i++) {
             while (!q.try_enqueue(*p_token, std::move(i)))
                     continue;
-            enqueue_cnt++;
+            ++enqueue_cnt;
             learnlog::base::os::sleep_for_ms(write_interval_ms);
         }
 
@@ -206,6 +210,7 @@ void mpmc_bind_concurrent_queue(concurrent_queue& q, size_t thread_enqueue_size,
     };
 
     std::vector<size_t> dequeue_cnts(thread_enqueue_size);
+    std::mutex dequeue_cnts_mutex;
     std::atomic<size_t> dequeue_cnt{0};
     std::atomic<size_t> p_tokens_idx{0};
     auto read_func = [&] {
@@ -214,7 +219,10 @@ void mpmc_bind_concurrent_queue(concurrent_queue& q, size_t thread_enqueue_size,
         int item;
         while (true) {
             if (q.try_dequeue_from_producer(*p_token, item)) {
-                ++dequeue_cnts[item];
+                {
+                    std::lock_guard<std::mutex> lock(dequeue_cnts_mutex);
+                    ++dequeue_cnts[item];
+                }
                 ++dequeue_cnt;
                 learnlog::base::os::sleep_for_ms(read_interval_ms);
             }
@@ -249,7 +257,7 @@ void mpmc_block_concurrent_queue_notoken(block_concurrent_queue& q,
     std::vector<std::thread> threads;
     size_t enqueue_num = thread_enqueue_size * write_thread_num;
     size_t write_interval_ms = 10;
-    size_t read_interval_ms = 5;
+    size_t read_wait_interval_ms = 5;
     
     std::atomic<bool> enqueue_finished{false};
     std::atomic<size_t> enqueue_cnt{0};
@@ -267,12 +275,16 @@ void mpmc_block_concurrent_queue_notoken(block_concurrent_queue& q,
     };
 
     std::vector<size_t> dequeue_cnts(thread_enqueue_size);
+    std::mutex dequeue_cnts_mutex;
     auto read_func = [&] {
         int item;
         while (true) {
             if (q.wait_dequeue_timed(item, 
-                                     learnlog::milliseconds(read_interval_ms))) {
-                ++dequeue_cnts[item];
+                                     learnlog::milliseconds(read_wait_interval_ms))) {
+                {
+                    std::lock_guard<std::mutex> lock(dequeue_cnts_mutex);
+                    ++dequeue_cnts[item];
+                }
             }
             else {
                 if (enqueue_finished.load()) break;
@@ -300,30 +312,30 @@ void mpmc_block_concurrent_queue_notoken(block_concurrent_queue& q,
 
 TEST_CASE("concurrent_queue_mpmc", "[concurrent_queue]") {
     const size_t BLOCK_SIZE = 32;
-    size_t q_size = 1024;
+    size_t q_size = 128;
     
     size_t write_thread_num = q_size / BLOCK_SIZE;
     size_t read_thread_num = 2;
 
-    // 每个 producer 获取一个 only_producer_token 来入队，每个 consumer 获取一个 consumer_token 来出队，
-    // 由于使用了 token，producer 请求到的 BLOCK 不会释放，所以
+    // 每个 producer 获取一个 producer_token 来入队，每个 consumer 获取一个 consumer_token 来出队，
+    // 由于使用了 token 和 try_enqueue()，producer 请求到的 BLOCK 不会释放，所以
     // 每个 producer 只能分得 1 个 BLOCK
     concurrent_queue q1(q_size);
     mpmc_concurrent_queue(q1, BLOCK_SIZE, write_thread_num, read_thread_num, 
                           producer_consumer_token);
     REQUIRE(q1.size_approx() == 0);
     
-    // 每个 producer 获取一个 only_producer_token 来入队，每个 consumer 使用一个 only_producer_token 来出队，
+    // 每个 producer 获取一个 producer_token 来入队，每个 consumer 使用一个 producer_token 来出队，
     // producer 与 consumer 一一对应，
-    // 由于使用了 token，producer 请求到的 BLOCK 不会释放，所以
+    // 由于使用了 token 和 try_enqueue()，producer 请求到的 BLOCK 不会释放，所以
     // 每个 producer 只能分得 1 个 BLOCK
     concurrent_queue q2(q_size);
     mpmc_bind_concurrent_queue(q2, BLOCK_SIZE, write_thread_num, 
                                only_producer_token);
     REQUIRE(q2.size_approx() == 0);
     
-    // 不使用 producer_token，每个 producer 请求到的 BLOCK 在所有元素出队后会释放，所以
-    // BLOCK 可以循环利用，producer 可以获取到更多的 BLOCK
+    // 使用 try_enqueue()，但是不使用 token，每个 producer 请求到的 BLOCK 在这个 BLOCK 的所有元素
+    // 出队后会释放，所以 BLOCK 可以循环利用，producer 可以获取到更多的 BLOCK
     concurrent_queue q3(q_size);
     mpmc_concurrent_queue(q3, q_size / 2, write_thread_num, read_thread_num, 
                           no_token);
@@ -331,15 +343,15 @@ TEST_CASE("concurrent_queue_mpmc", "[concurrent_queue]") {
 }
 
 TEST_CASE("block_concurrent_queue_mpmc", "[concurrent_queue]") { 
-    size_t q_size = 1024;
+    size_t q_size = 128;
     
-    size_t write_thread_num = 2;
-    size_t read_thread_num = write_thread_num * 4;
+    size_t write_thread_num = 4;
+    size_t read_thread_num = write_thread_num * 2;
 
-    // block_concurrent_queue 用轻量级信号量实现了 wait_dequeue()，代替 concurrent_queue
+    // block_concurrent_queue 用轻量级无锁信号量实现了 wait_dequeue()，代替 concurrent_queue
     // 中的忙等待 while(!try_dequeue()) continue;
     block_concurrent_queue q(q_size);
-    mpmc_block_concurrent_queue_notoken(q, q_size / 2, 
+    mpmc_block_concurrent_queue_notoken(q, q_size, 
                                         write_thread_num, read_thread_num);
     REQUIRE(q.size_approx() == 0);                                    
 }

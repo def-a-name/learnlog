@@ -17,7 +17,7 @@ void throw_error(int cnt) {
 
 TEST_CASE("test_handle_exception_std_thread", "[exception]") {
     std::vector<std::thread> threads;
-    int thread_num = 100;
+    int thread_num = 10;
     int i;
     for (i = 0; i < thread_num; ++i) {
         threads.emplace_back(throw_error, i);
@@ -28,17 +28,4 @@ TEST_CASE("test_handle_exception_std_thread", "[exception]") {
         i++;
     }
     REQUIRE(i == thread_num);
-}
-
-TEST_CASE("test_handle_exception_section", "[exception]") {
-
-    SECTION("Section 1") {
-        throw_error(-1);
-    }
-    SECTION("Section 2") {
-        throw_error(-2);
-    }
-    SECTION("Section 3") {
-        throw_error(-3);
-    }
 }

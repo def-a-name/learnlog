@@ -25,11 +25,9 @@ public:
         {
             std::unique_lock<std::mutex> lock(mutex_);
             cv_.wait(lock, [this] { return !this->oss_.str().empty(); });
-            if (!this->oss_.str().empty()) {
-                recv = oss_.str();
-                oss_.str("");
-            } 
-        }
+            recv = oss_.str();
+            oss_.str("");
+    }
         std::cout << "recv timestamp: " << recv << std::endl;
         return recv;
     }

@@ -24,13 +24,9 @@ else()
     FetchContent_MakeAvailable(Catch2)
 endif()
 
-set(LEARNLOG_UTEST_HELLOWORLD_SOURCES
-    test_helloworld.cpp
-)
-
 set(LEARNLOG_UTEST_BASE_SOURCES
     test_circular_queue.cpp
-    test_mpmc_queue.cpp
+    test_block_queue.cpp
     test_handle_exception.cpp
     test_fmt_base.cpp
     test_file_base.cpp
@@ -63,7 +59,10 @@ function(learnlog_prepare_test test_target test_srcs learnlog_lib)
     endif()
     target_link_libraries(${test_target} PRIVATE Catch2::Catch2WithMain)
     if(LEARNLOG_SANITIZE_ADDRESS)
-        spdlog_enable_sanitizer(${test_target})
+        spdlog_enable_address_sanitizer(${test_target})
+    endif()
+    if(LEARNLOG_SANITIZE_THREAD)
+        spdlog_enable_thread_sanitizer(${test_target})
     endif()
     add_test(NAME ${test_target} COMMAND ${test_target})
     set_tests_properties(${test_target} PROPERTIES RUN_SERIAL ON)

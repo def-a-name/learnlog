@@ -6,7 +6,7 @@
 
 TEST_CASE("lock_msg_queue", "[async_logger]") {
     auto test_sink = std::make_shared<learnlog::sinks::test_sink_mt>();
-    test_sink->set_sink_delay_ms(2);
+    // test_sink->set_sink_delay_ms(1);
     size_t msg_queue_size = 128;
     size_t thread_num = 1;
     size_t msg_num = msg_queue_size * 2;
@@ -35,7 +35,7 @@ TEST_CASE("lock_msg_queue", "[async_logger]") {
 
 TEST_CASE("lockfree_msg_queue", "[async_logger]") {
     auto test_sink = std::make_shared<learnlog::sinks::test_sink_mt>();
-    test_sink->set_sink_delay_ms(2);
+    // test_sink->set_sink_delay_ms(1);
     size_t msg_queue_size = 128;
     size_t thread_num = 1;
     size_t msg_num = msg_queue_size * 2;
@@ -56,12 +56,12 @@ TEST_CASE("lockfree_msg_queue", "[async_logger]") {
 
     REQUIRE(test_sink->msg_count() == msg_num);
     REQUIRE(test_sink->flush_count() == 1);
-    CHECK(current_cnt == 0);
+    REQUIRE(current_cnt == 0);
 }
 
 TEST_CASE("lockfree_concurrent_msg_queue", "[async_logger]") {
     auto test_sink = std::make_shared<learnlog::sinks::test_sink_mt>();
-    test_sink->set_sink_delay_ms(2);
+    // test_sink->set_sink_delay_ms(1);
     size_t msg_queue_size = 128;
     size_t thread_num = 1;
     size_t msg_num = msg_queue_size * 2;
@@ -82,12 +82,12 @@ TEST_CASE("lockfree_concurrent_msg_queue", "[async_logger]") {
 
     REQUIRE(test_sink->msg_count() == msg_num);
     REQUIRE(test_sink->flush_count() == 1);
-    CHECK(current_cnt == 0);
+    REQUIRE(current_cnt == 0);
 }
 
 TEST_CASE("reset thread pool", "[async_logger]") {
     auto test_sink = std::make_shared<learnlog::sinks::test_sink_mt>();
-    test_sink->set_sink_delay_ms(2);
+    // test_sink->set_sink_delay_ms(1);
     size_t msg_queue_size = 128;
     size_t thread_num = 1;
     size_t msg_num = msg_queue_size * 2;
@@ -113,33 +113,35 @@ TEST_CASE("invalid thread pool", "[async_logger]") {
     auto logger = std::make_shared<learnlog::async_logger>("invalid tp",
                                                            test_sink,
                                                            tp);
-    logger->info("message will not be logged"); // throw exception
+    // throw exception
+    logger->info("message will not be logged");
     REQUIRE(test_sink->msg_count() == 0);
 }
 
 TEST_CASE("multithreads", "[async_logger]") {
     auto test_sink = std::make_shared<learnlog::sinks::test_sink_mt>();
-    test_sink->set_sink_delay_ms(1);
+    // test_sink->set_sink_delay_ms(1);
     size_t msg_queue_size = 128;
     size_t msg_num = msg_queue_size * 2;
-    size_t thread_num = 4;
+    size_t thread_num = 2;
     size_t msg_num_per_thread = msg_num / thread_num;
     std::vector<learnlog::logger_shr_ptr> loggers;
 
-    auto tp_lock = std::make_shared<learnlog::base::lock_thread_pool>(msg_queue_size,
-                                                                      2);
+    auto tp_lock = 
+        std::make_shared<learnlog::base::lock_thread_pool>(msg_queue_size,
+                                                           thread_num);
     loggers.emplace_back(std::make_shared<learnlog::async_logger>("async_lock", 
                                                                   test_sink,
                                                                   std::move(tp_lock)));
     auto tp_lockfree = 
         std::make_shared<learnlog::base::lockfree_thread_pool>(msg_queue_size,
-                                                               2);
+                                                               thread_num);
     loggers.emplace_back(std::make_shared<learnlog::async_logger>("async_lockfree", 
                                                                   test_sink,
                                                                   std::move(tp_lockfree)));
     auto tp_lockfree_concurrent = 
         std::make_shared<learnlog::base::lockfree_concurrent_thread_pool>(msg_queue_size,
-                                                                          2);
+                                                                          thread_num);
     loggers.emplace_back(std::make_shared<learnlog::async_logger>("async_lockfree_concurrent", 
                                                                   test_sink,
                                                                   std::move(tp_lockfree_concurrent)));

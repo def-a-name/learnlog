@@ -8,6 +8,12 @@
 
 namespace learnlog {
 
+#ifdef LEARNLOG_USE_TLS
+    #if (defined(_MSC_VER) && _MSC_VER < 1900) || (defined(__MINGW32__) || defined(__MINGW64__) && defined(__WINPTHREADS_VERSION)) || (defined(__GNUC__) && __GNUC__ <= 4)
+        #define LEARNLOG_USE_TLS 0
+    #endif
+#endif
+
 // system_clock
 using sys_clock = std::chrono::system_clock;
 using seconds = std::chrono::seconds;

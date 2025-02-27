@@ -65,24 +65,40 @@ public:
         size_t bytes_written = 0;
         DWORD bytes;
         if (is_color_enabled_ && msg.color_index_end > msg.color_index_start) {
-            ::WriteConsoleW(handle_, wbuf.data(), msg.color_index_start, &bytes, nullptr);
+            DWORD col_start = static_cast<DWORD>(msg.color_index_start);
+            DWORD col_end = static_cast<DWORD>(msg.color_index_end);
+            ::WriteConsoleW(handle_, 
+                            wbuf.data(),
+                            col_start,
+                            &bytes,
+                            nullptr);
             bytes_written += bytes;
 
             // 根据 log_msg.level 确定颜色，通过 win api 给标记文字区间上色，然后恢复默认颜色
             WORD origin_color = get_text_color_();
             level_color = level_color | (origin_color & 0xf0);  // 保留当前控制台的背景颜色
             set_text_color_(level_color);
-            ::WriteConsoleW(handle_, wbuf.data() + msg.color_index_start, 
-                            msg.color_index_end - msg.color_index_start, &bytes, nullptr);
+            ::WriteConsoleW(handle_,
+                            wbuf.data() + col_start, 
+                            col_end - col_start,
+                            &bytes,
+                            nullptr);
             bytes_written += bytes;
             set_text_color_(origin_color);
 
-            ::WriteConsoleW(handle_, wbuf.data() + msg.color_index_end, 
-                            wbuf.size() - msg.color_index_end, &bytes, nullptr);
+            ::WriteConsoleW(handle_,
+                            wbuf.data() + col_end, 
+                            static_cast<DWORD>(wbuf.size()) - col_end,
+                            &bytes,
+                            nullptr);
             bytes_written += bytes;
         }
         else {
-            ::WriteConsoleW(handle_, wbuf.data(), wbuf.size(), &bytes, nullptr);
+            ::WriteConsoleW(handle_, 
+                            wbuf.data(),
+                            static_cast<DWORD>(wbuf.size()),
+                            &bytes,
+                            nullptr);
             bytes_written = bytes;
         }
 

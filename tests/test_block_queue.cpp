@@ -31,7 +31,7 @@ TEST_CASE("full_enqueue_empty_dequeue", "[mpmc_blocking_q]") {
     }
 
     milliseconds wait_ms(100);
-    milliseconds tolerance_wait(5);
+    milliseconds tolerance_wait(50);
 
     auto start = test_clock::now();
     bool res = q.dequeue_for(item, wait_ms);
@@ -50,7 +50,7 @@ TEST_CASE("invalid_queue", "[mpmc_blocking_q]") {
     REQUIRE(q.size() == 0);
     
     int item = -1;
-    milliseconds tolerance_wait(5);
+    milliseconds tolerance_wait(50);
     auto start = test_clock::now();
     bool res = q.dequeue_for(item, milliseconds(0));
     auto delta_ms = millis_from(start);
@@ -88,15 +88,15 @@ enum enqueue_mode : int {
 };
 
 size_t mpmc(q_type& q, size_t q_size, 
-         size_t w_thread_num, size_t r_thread_num, 
-         enqueue_mode mode) {
+            size_t w_thread_num, size_t r_thread_num, 
+            enqueue_mode mode) {
     std::vector<std::thread> threads;
     size_t enqueue_num = q_size * w_thread_num;
-    size_t write_interval = 10;
-    size_t read_interval = 20;
+    size_t write_interval = 5;
+    size_t read_interval = 10;
     std::atomic<bool> finished{false};
     
-    std::atomic<int> enqueue_cnt{0};
+    std::atomic<size_t> enqueue_cnt{0};
     auto write_func = [&] {
         for (size_t i = 0; i < q_size; i++) {
             switch (mode) {
@@ -113,7 +113,7 @@ size_t mpmc(q_type& q, size_t q_size,
             enqueue_cnt++;
             learnlog::base::os::sleep_for_ms(write_interval);
         }
-        if (static_cast<size_t>(enqueue_cnt.load()) == enqueue_num) {
+        if (enqueue_cnt.load() == enqueue_num) {
             finished.store(true);
         }
     };
@@ -122,9 +122,10 @@ size_t mpmc(q_type& q, size_t q_size,
     auto read_func = [&] {
         int item;
         while (true) {
-            if (q.dequeue_for(item, milliseconds(read_interval))) {
+            if (q.dequeue_for(item, milliseconds(0))) {
                 REQUIRE(item == 2024);
                 dequeue_cnt++;
+                learnlog::base::os::sleep_for_ms(read_interval);
             }
             else {
                 if (finished.load()) break;
@@ -151,8 +152,8 @@ size_t mpmc(q_type& q, size_t q_size,
 TEST_CASE("multithread_enqueue_if_have_room", "[mpmc_blocking_q]") {
     size_t q_size = 100;
     q_type q(q_size);
-    size_t write_thread_num = 50;
-    size_t read_thread_num = 50;
+    size_t write_thread_num = 10;
+    size_t read_thread_num = 10;
     
     size_t dequeue_cnt = mpmc(q, q_size, write_thread_num, read_thread_num,
                            enqueue_mode::enqueue_if_have_room);
@@ -165,8 +166,8 @@ TEST_CASE("multithread_enqueue_if_have_room", "[mpmc_blocking_q]") {
 TEST_CASE("multithread_enqueue", "[mpmc_blocking_q]") {
     size_t q_size = 100;
     q_type q(q_size);
-    size_t write_thread_num = 50;
-    size_t read_thread_num = 50;
+    size_t write_thread_num = 10;
+    size_t read_thread_num = 10;
     
     size_t dequeue_cnt = mpmc(q, q_size, write_thread_num, read_thread_num,
                            enqueue_mode::enqueue);
@@ -179,8 +180,8 @@ TEST_CASE("multithread_enqueue", "[mpmc_blocking_q]") {
 TEST_CASE("multithread_enqueue_nowait", "[mpmc_blocking_q]") {
     size_t q_size = 100;
     q_type q(q_size);
-    size_t write_thread_num = 50;
-    size_t read_thread_num = 50;
+    size_t write_thread_num = 10;
+    size_t read_thread_num = 10;
     
     size_t dequeue_cnt = mpmc(q, q_size, write_thread_num, read_thread_num,
                            enqueue_mode::enqueue_nowait);

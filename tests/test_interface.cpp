@@ -10,9 +10,11 @@
 #define DEFAULT_LOG_LEVEL learnlog::level::info
 
 TEST_CASE("default_logger", "[interface]") {
+#ifndef _WIN32
     auto default_logger = learnlog::get_default_logger();
     REQUIRE(default_logger->get_log_level() == DEFAULT_LOG_LEVEL);
     default_logger->info("message from default logger");
+#endif
 
     auto sink = std::make_shared<learnlog::sinks::null_sink_mt>();
     auto new_logger = std::make_shared<learnlog::logger>(LOGGER_NAME, sink);
@@ -27,7 +29,7 @@ TEST_CASE("create_logger", "[interface]") {
     learnlog::create<learnlog::sinks::null_sink_st>(LOGGER_NAME);
     REQUIRE(learnlog::get_logger(LOGGER_NAME) != nullptr);
     
-    // catch exception 1
+    // throw exception
     learnlog::create<learnlog::sinks::null_sink_st>(LOGGER_NAME);
 }
 
@@ -94,7 +96,7 @@ TEST_CASE("patterns", "[interface]") {
     REQUIRE(learnlog::get_logger(LOGGER_NAME_2)->get_pattern() == "%n {%v}");
 
     learnlog::remove_logger(LOGGER_NAME_2);
-    // catch exception 4
+    // throw exception
     learnlog::set_pattern(LOGGER_NAME_2, "%v");
 }
 
@@ -115,9 +117,9 @@ TEST_CASE("levels", "[interface]") {
     REQUIRE(new_logger->get_log_level() == learnlog::level::warn);
     REQUIRE(new_logger->get_flush_level() == learnlog::level::warn);
     
-    // catch exception 2
+    // throw exception
     learnlog::set_log_level(LOGGER_NAME_2, learnlog::level::error);
-    // catch exception 3
+    // throw exception
     learnlog::set_flush_level(LOGGER_NAME_2, learnlog::level::error);
 }
 

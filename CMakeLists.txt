@@ -37,6 +37,10 @@ option(LEARNLOG_BUILD_BENCH "Build benchmarks" OFF)
 
 # sanitizer options
 option(LEARNLOG_SANITIZE_ADDRESS "Enable address sanitizer" OFF)
+option(LEARNLOG_SANITIZE_THREAD "Enable thread sanitizer" OFF)
+if (LEARNLOG_SANITIZE_ADDRESS AND LEARNLOG_SANITIZE_THREAD)
+    message(FATAL_ERROR "Sanitizers are mutually exclusive")
+endif ()
 
 # tls options
 option(LEARNLOG_USE_TLS "Use thread local storage" ON)
@@ -80,9 +84,6 @@ target_include_directories(learnlog PUBLIC
                             $<BUILD_INTERFACE:${LEARNLOG_HEADERS_DIR}>)
 target_link_libraries(learnlog PUBLIC fmt::fmt)
 target_link_libraries(learnlog PUBLIC learnlog_base learnlog_sinks)
-if(LEARNLOG_SANITIZE_ADDRESS)
-    spdlog_enable_sanitizer(learnlog)
-endif()
 spdlog_enable_warnings(learnlog)
 
 # ---------------------------------------------------------------------------------------

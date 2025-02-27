@@ -132,9 +132,9 @@ void learnlog::async_helloworld() {
     // auto thread_pool = learnlog::get_thread_pool();
     auto sink = std::make_shared<learnlog::sinks::basic_file_sink_mt>(fname, true);
     auto logger = std::make_shared<async_logger>("async_lockfree_concurrent_example", 
-                               std::move(sink),
-                               std::move(thread_pool));
-    logger->set_pattern("thread [%t]: <%T.%F> %v");
+                                                 std::move(sink),
+                                                 std::move(thread_pool));
+    logger->set_pattern("thread [%5t]: <%T.%F> %v");
 
     auto thread_func = [&logger, msg_per_thread] {
         for (size_t i = 0; i < msg_per_thread; i++) {
