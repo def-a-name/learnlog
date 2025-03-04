@@ -34,7 +34,7 @@ int main(int argc, char *argv[]) {
         learnlog::info("Queue size: {:L}", q_size);
         learnlog::info("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
 
-        std::vector<double> mpsc_msg_fill_rate{1.0, 4.0, 8.0, 16.0};
+        std::vector<double> mpsc_msg_fill_rate{1.0, 4.0, 16.0, 64.0};
         std::vector<int> thread_cnts{1, 2, 4, 8, 16};
 
         learnlog::info("*********************************");

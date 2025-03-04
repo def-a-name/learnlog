@@ -12,7 +12,7 @@ message(STATUS "Build learnlog")
 # Set default build to Release
 # ---------------------------------------------------------------------------------------
 if(NOT CMAKE_BUILD_TYPE)
-    set(CMAKE_BUILD_TYPE "Release" CACHE STRING "Choose Release or Debug")
+    set(CMAKE_BUILD_TYPE "Release" CACHE STRING "Choose Release or Debug" FORCE)
 endif()
 
 # ---------------------------------------------------------------------------------------
