@@ -49,8 +49,8 @@ THE SOFTWARE.
 This software depends on the fmt lib (MIT License),
 and users must comply to its license: https://raw.githubusercontent.com/fmtlib/fmt/master/LICENSE
 
-# 'learnlog' also uses 'concurrentqueue' (https://github.com/cameron314/concurrentqueue),
-# the copyright and license of it are as follows
+# 'learnlog' also uses 'ConcurrentQueue' (https://github.com/cameron314/concurrentqueue),
+# the copyright and license of which are as follows
 
 Simplified BSD License:
 

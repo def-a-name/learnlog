@@ -87,10 +87,10 @@ public:
                       []{}),
           tokens_using_(threads_num_),
           msg_q_(msg_q_size_) {
-        for (size_t i = 0; i < threads_num; ++i) {
+        for (size_t i = 0; i < threads_num_; ++i) {
             tokens_.emplace_back(learnlog::make_unique<moodycamel::ProducerToken>(msg_q_));
         }
-        for (size_t i = 0; i < threads_num; ++i) {
+        for (size_t i = 0; i < threads_num_; ++i) {
             threads_.emplace_back([this] {
                 start_func_();
                 tokens_sema_.wait();
@@ -136,17 +136,26 @@ private:
             tokens_sema_.signal();
         }
 
+        auto p_token = tokens_[p_token_idx_].get();
         if (producer_cnt_.load(std::memory_order_relaxed) > threads_num_) {
             bool expected = false;
             while (!tokens_using_[p_token_idx_].compare_exchange_weak(expected, true,
-                                                                    std::memory_order_relaxed)) {
+                                                                      std::memory_order_relaxed)) {
                 expected = false;
             }
-            msg_q_.enqueue(*tokens_[p_token_idx_], std::move(amsg));
+            while (!msg_q_.try_enqueue(*p_token, std::move(amsg))) {
+                if (msg_q_.enqueue(*p_token, std::move(amsg))) {
+                    break;
+                }
+            }
             tokens_using_[p_token_idx_].store(false, std::memory_order_relaxed);
         }
         else {
-            msg_q_.enqueue(*tokens_[p_token_idx_], std::move(amsg));
+            while (!msg_q_.try_enqueue(*p_token, std::move(amsg))) {
+                if (msg_q_.enqueue(*p_token, std::move(amsg))) {
+                    break;
+                }
+            }
         }
 #else
         size_t tid = os::thread_id();
@@ -161,18 +170,26 @@ private:
             idx = producer_p_token_idx_[tid];
         }
         
+        auto p_token = tokens_[idx].get();
         if (producer_cnt_.load(std::memory_order_relaxed) > threads_num_) {
             bool expected = false;
             while (!tokens_using_[idx].compare_exchange_weak(expected, true,
-                                                             std::memory_order_relaxed,
                                                              std::memory_order_relaxed)) {
                 expected = false;
             }
-            msg_q_.enqueue(*tokens_[idx], std::move(amsg));
+            while (!msg_q_.try_enqueue(*p_token, std::move(amsg))) {
+                if (msg_q_.enqueue(*p_token, std::move(amsg))) {
+                    break;
+                }
+            }
             tokens_using_[idx].store(false, std::memory_order_relaxed);
         }
         else {
-            msg_q_.enqueue(*tokens_[idx], std::move(amsg));
+            while (!msg_q_.try_enqueue(*p_token, std::move(amsg))) {
+                if (msg_q_.enqueue(*p_token, std::move(amsg))) {
+                    break;
+                }
+            }
         }
 #endif
     }

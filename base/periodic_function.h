@@ -4,6 +4,7 @@
 #include <functional>
 #include <thread>
 #include <mutex>
+#include <atomic>
 #include <condition_variable>
 
 namespace learnlog {
@@ -35,20 +36,17 @@ public:
 
     ~periodic_function() {
         if (thread_.joinable()) {
-            {
-                std::lock_guard<std::mutex> lock(mutex_);
-                active_ = false;
-            }
+            active_ = false;
             cv_.notify_one();
             thread_.join();
         }
     }
 
 private:
-    bool active_;
     std::thread thread_;
     std::mutex mutex_;
     std::condition_variable cv_;
+    std::atomic<bool> active_;
 };
 
 }   // namespace base

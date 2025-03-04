@@ -45,7 +45,7 @@ TEST_CASE("test_periodic_function", "[periodic_function]") {
     size_t interval_sec = 1;
     {
         learnlog::base::periodic_function p_func(std::bind(&tester::produce_timestamp, &t),
-                                      std::chrono::seconds(interval_sec));
+                                                 std::chrono::seconds(interval_sec));
         size_t last_ts = 0;
         while (std::time(nullptr) - start_time < 5) {
             size_t ts = static_cast<size_t>(std::stoi(t.consume_timestamp()));

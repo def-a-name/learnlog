@@ -1,0 +1,273 @@
+#include "learnlog.h"
+#include "sinks/basic_file_sink.h"
+
+using ull = learnlog::u_long_long;
+
+template <typename Threadpool>
+void bench_msg(int q_size,
+               const std::vector<int>& msg_ratios,
+               int pthread_num,
+               int cthread_num,
+               std::string&& logger_name);
+
+template <typename Threadpool>
+void bench_pthread(int q_size,
+                   ull msg_num,
+                   const std::vector<int>& pthread_nums,
+                   int cthread_num,
+                   std::string&& logger_name);
+
+template <typename Threadpool>
+void bench_cthread(int q_size,
+                   ull msg_num,
+                   int pthread_num,
+                   const std::vector<int>& cthread_nums,
+                   std::string&& logger_name);
+
+int main(int argc, char *argv[]) {
+    int q_size = 8192;
+    int iters = 3;
+    int msg_num = 819200;
+    int pthread_num = 8;
+    int cthread_num = 8;
+
+    try {
+        learnlog::set_global_pattern("[%^%l%$] %v");
+        learnlog::set_global_log_level(learnlog::level::debug);
+
+        if (argc > 1) {
+            q_size = atoi(argv[1]);
+            if (q_size < 512) {
+                learnlog::warn("Message queue size should be at least 512 !");
+                q_size = 512;
+            }
+            msg_num = q_size * 100;
+        }
+        if (argc > 2) {
+            iters = atoi(argv[2]);
+        }
+        if (argc > 3) {
+            msg_num = atoi(argv[3]);
+        }
+        if (argc > 4) {
+            pthread_num = atoi(argv[4]);
+        }
+        if (argc > 5) {
+            cthread_num = atoi(argv[5]);
+        }
+        if (argc > 6) {
+            learnlog::error(
+                "Unknown args! Usage: {} <queue_size> <iter_times> <msg_num> <pthread_num> <cthread_num>", argv[0]);
+            return 0;
+        }
+
+        std::vector<int> msg_fill_ratios{1, 2, 4, 16, 64};
+        std::vector<int> pthread_nums{1, 2, 4, 6, 8};
+        std::vector<int> cthread_nums{1, 2, 4, 6, 8};
+
+        learnlog::info("*********************************");
+        learnlog::info("Change total messages count (throughput | msg/ms)");
+        learnlog::info("*********************************");
+        learnlog::info("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+        learnlog::info("Message queue size  : {:L}", q_size);
+        learnlog::info("Iterations          : {:L}", iters);
+        learnlog::info("Produce threads     : {:L}", pthread_num);
+        learnlog::info("Consume threads     : {:L}", cthread_num);
+        learnlog::info("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+        learnlog::debug("tp: thread pool");
+        learnlog::debug("msg_num: total messages number");
+        
+        for (int i = 1; i <= iters; i++) {
+            learnlog::info("~~~~~~~~~~~~~~~~~~~");
+            learnlog::info("Iteration: {:d}", i);
+            learnlog::info("~~~~~~~~~~~~~~~~~~~");
+            auto it = msg_fill_ratios.end() - 1;
+            learnlog::info("-------------------------------------------------");
+            learnlog::info("{:24s}|{:<8L}*{:<4d}|{:<8L}*{:<4d}|{:<8L}*{:<4d}|{:<8L}*{:<4d}|{:<8L}*{:<4d}",
+                           "tp\\msg_num",
+                           q_size, *(it--), q_size, *(it--), q_size, *(it--), q_size, *(it--), q_size, *(it--));
+            learnlog::info("-------------------------------------------------");
+            
+            bench_msg<learnlog::base::lock_thread_pool>(q_size, msg_fill_ratios, pthread_num, cthread_num, "lock");
+            bench_msg<learnlog::base::lockfree_thread_pool>(q_size, msg_fill_ratios, pthread_num, cthread_num, "lockfree");
+            bench_msg<learnlog::base::lockfree_concurrent_thread_pool>(q_size, msg_fill_ratios, pthread_num, cthread_num, "lockfree_concurrent");
+        }
+
+        learnlog::debug("\n");
+        learnlog::info("*********************************");
+        learnlog::info("Change produce threads count (throughput | msg/ms)");
+        learnlog::info("*********************************");
+        learnlog::info("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+        learnlog::info("Message queue size          : {:L}", q_size);
+        learnlog::info("Iterations                  : {:L}", iters);
+        learnlog::info("Total messages              : {:L}", msg_num);
+        learnlog::info("Consume threads             : {:L}", cthread_num);
+        learnlog::info("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+        learnlog::debug("tp: thread pool");
+        learnlog::debug("p_thd_num: produce threads(writers) number");
+        
+        for (int i = 1; i <= iters; i++) {
+            learnlog::info("~~~~~~~~~~~~~~~~~~~");
+            learnlog::info("Iteration: {}", i);
+            learnlog::info("~~~~~~~~~~~~~~~~~~~");
+            auto it = pthread_nums.end() - 1;
+            learnlog::info("-------------------------------------------------");
+            learnlog::info("{:24s}| {:<12d}| {:<12d}| {:<12d}| {:<12d}| {:<12d}",
+                           "tp\\p_thd_num",
+                           *(it--), *(it--), *(it--), *(it--), *(it--));
+            learnlog::info("-------------------------------------------------");
+
+            bench_pthread<learnlog::base::lock_thread_pool>(q_size, msg_num, pthread_nums, cthread_num, "lock");
+            bench_pthread<learnlog::base::lockfree_thread_pool>(q_size, msg_num, pthread_nums, cthread_num, "lockfree");
+            bench_pthread<learnlog::base::lockfree_concurrent_thread_pool>(q_size, msg_num, pthread_nums, cthread_num, "lockfree_concurrent");
+        }
+
+        learnlog::debug("\n");
+        learnlog::info("*********************************");
+        learnlog::info("Change consume threads count (throughput | msg/ms)");
+        learnlog::info("*********************************");
+        learnlog::info("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+        learnlog::info("Message queue size          : {:L}", q_size);
+        learnlog::info("Iterations                  : {:L}", iters);
+        learnlog::info("Total messages              : {:L}", msg_num);
+        learnlog::info("Produce threads             : {:L}", pthread_num);
+        learnlog::info("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+        learnlog::debug("tp: thread pool");
+        learnlog::debug("c_thd_num: consume threads(readers) number");
+        
+        for (int i = 1; i <= iters; i++) {
+            learnlog::info("~~~~~~~~~~~~~~~~~~~");
+            learnlog::info("Iteration: {}", i);
+            learnlog::info("~~~~~~~~~~~~~~~~~~~");
+            auto it = cthread_nums.end() - 1;
+            learnlog::info("-------------------------------------------------");
+            learnlog::info("{:24s}| {:<12d}| {:<12d}| {:<12d}| {:<12d}| {:<12d}",
+                           "tp\\c_thd_num",
+                           *(it--), *(it--), *(it--), *(it--), *(it--));
+            learnlog::info("-------------------------------------------------");
+
+            bench_cthread<learnlog::base::lock_thread_pool>(q_size, msg_num, pthread_num, cthread_nums, "lock");
+            bench_cthread<learnlog::base::lockfree_thread_pool>(q_size, msg_num, pthread_num, cthread_nums, "lockfree");
+            bench_cthread<learnlog::base::lockfree_concurrent_thread_pool>(q_size, msg_num, pthread_num, cthread_nums, "lockfree_concurrent");
+        }
+    }
+    LEARNLOG_CATCH
+
+    return 0;
+}
+
+ull bench_(ull msg_num, learnlog::logger_shr_ptr logger, int pthread_num) {
+    auto thread_func = [&logger] (ull msg_num_pt) {
+        for (ull i = 0; i < msg_num_pt; i++) {
+            logger->info("message #{}", i);
+        }
+    };
+    
+    ull msg_num_per_thread = msg_num / pthread_num;
+    ull msg_num_mod = msg_num % pthread_num;
+    std::vector<std::thread> threads;
+
+    auto start_tp = learnlog::sys_clock::now();
+
+    threads.emplace_back(thread_func, msg_num_per_thread + msg_num_mod);
+    for (int i = 1; i < pthread_num; i++) {
+        threads.emplace_back(thread_func, msg_num_per_thread);
+    }
+    for (auto& t : threads) {
+        t.join();
+    }
+
+    auto delta = learnlog::sys_clock::now() - start_tp;
+    return msg_num * 1000000 / delta.count();
+}
+
+template <typename Threadpool>
+void bench_msg(int q_size,
+               const std::vector<int>& msg_ratios,
+               int pthread_num,
+               int cthread_num,
+               std::string&& logger_name) {
+#ifdef _WIN32
+    learnlog::filename_t fname = L"bench_tmp/async_thread_pool.log";
+#else
+    learnlog::filename_t fname = "bench_tmp/async_thread_pool.log";
+#endif
+    auto tp = std::make_shared<Threadpool>(q_size, cthread_num);
+    auto sink = std::make_shared<learnlog::sinks::basic_file_sink_mt>(fname, true);
+    auto logger = std::make_shared<learnlog::async_logger>( logger_name,
+                                                            std::move(sink),
+                                                            std::move(tp));
+    logger->set_pattern("[%n]: %v");
+    std::vector<ull> throughputs;
+    for (auto &fill_ratio : msg_ratios) {
+        throughputs.push_back(bench_(q_size * fill_ratio, logger, pthread_num));
+    }
+    learnlog::info( "{:24s}| {:<12L}| {:<12L}| {:<12L}| {:<12L}| {:<12L}",
+                    std::move(logger_name),
+                    throughputs[0],
+                    throughputs[1],
+                    throughputs[2],
+                    throughputs[3],
+                    throughputs[4]);
+}
+
+template <typename Threadpool>
+void bench_pthread(int q_size,
+                   ull msg_num,
+                   const std::vector<int>& pthread_nums,
+                   int cthread_num,
+                   std::string&& logger_name) {
+#ifdef _WIN32
+    learnlog::filename_t fname = L"bench_tmp/async_thread_pool.log";
+#else
+    learnlog::filename_t fname = "bench_tmp/async_thread_pool.log";
+#endif
+    auto tp = std::make_shared<Threadpool>(q_size, cthread_num);
+    auto sink = std::make_shared<learnlog::sinks::basic_file_sink_mt>(fname, true);
+    auto logger = std::make_shared<learnlog::async_logger>( logger_name,
+                                                            std::move(sink),
+                                                            std::move(tp));
+    logger->set_pattern("[%n]: %v");
+    std::vector<ull> throughputs;
+    for (auto &thread_num : pthread_nums) {
+        throughputs.push_back(bench_(msg_num, logger, thread_num));
+    }
+    learnlog::info( "{:24s}| {:<12L}| {:<12L}| {:<12L}| {:<12L}| {:<12L}",
+                    std::move(logger_name),
+                    throughputs[0],
+                    throughputs[1],
+                    throughputs[2],
+                    throughputs[3],
+                    throughputs[4]);
+}
+
+template <typename Threadpool>
+void bench_cthread(int q_size,
+                   ull msg_num,
+                   int pthread_num,
+                   const std::vector<int>& cthread_nums,
+                   std::string&& logger_name) {
+#ifdef _WIN32
+    learnlog::filename_t fname = L"bench_tmp/async_thread_pool.log";
+#else
+    learnlog::filename_t fname = "bench_tmp/async_thread_pool.log";
+#endif
+
+    std::vector<ull> throughputs;
+    for (auto &thread_num : cthread_nums) {
+        auto tp = std::make_shared<Threadpool>(q_size, thread_num);
+        auto sink = std::make_shared<learnlog::sinks::basic_file_sink_mt>(fname, true);
+        auto logger = std::make_shared<learnlog::async_logger>(logger_name, 
+                                                               std::move(sink), 
+                                                               std::move(tp));
+        logger->set_pattern("[%n]: %v");
+        throughputs.push_back(bench_(msg_num, std::move(logger), pthread_num));
+    }
+    learnlog::info( "{:24s}| {:<12L}| {:<12L}| {:<12L}| {:<12L}| {:<12L}",
+                    std::move(logger_name),
+                    throughputs[0],
+                    throughputs[1],
+                    throughputs[2],
+                    throughputs[3],
+                    throughputs[4]);
+}

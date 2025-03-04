@@ -73,9 +73,9 @@ TEST_CASE("backtrace_async", "[backtracer]") {
     for (int i = 0; i < 1000; i++) {
         oss_async_logger->debug("debug {}", i);
     }
-    learnlog::base::os::sleep_for_ms(100);
-
+    oss_async_logger->flush();
     REQUIRE(oss.str().empty());
+
     oss_async_logger->dump_backtrace();
     std::string expected = 
         "*********************** Backtrace Start ***********************" DEFAULT_EOL
@@ -83,6 +83,7 @@ TEST_CASE("backtrace_async", "[backtracer]") {
         "debug 998" DEFAULT_EOL
         "debug 999" DEFAULT_EOL
         "************************ Backtrace End ************************" DEFAULT_EOL;
-    learnlog::base::os::sleep_for_ms(100);
+    oss_async_logger->flush();
+    
     REQUIRE(oss.str() == expected);
 }

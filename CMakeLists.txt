@@ -24,23 +24,23 @@ if(NOT CMAKE_CXX_STANDARD)
 endif()
 
 # example options
-option(LEARNLOG_BUILD_EXAMPLES "Build examples" ON)
-
-# warning options
-option(LEARNLOG_BUILD_WARNINGS "Enable compiler warnings" OFF)
+option(LEARNLOG_BUILD_EXAMPLE "Build examples" ON)
 
 # test options
-option(LEARNLOG_BUILD_TESTS "Build tests" OFF)
+option(LEARNLOG_BUILD_TEST "Build tests" OFF)
 
 # bench options
 option(LEARNLOG_BUILD_BENCH "Build benchmarks" OFF)
 
 # sanitizer options
-option(LEARNLOG_SANITIZE_ADDRESS "Enable address sanitizer" OFF)
-option(LEARNLOG_SANITIZE_THREAD "Enable thread sanitizer" OFF)
+option(LEARNLOG_SANITIZE_ADDRESS "Enable address sanitizer in tests" OFF)
+option(LEARNLOG_SANITIZE_THREAD "Enable thread sanitizer in tests" OFF)
 if (LEARNLOG_SANITIZE_ADDRESS AND LEARNLOG_SANITIZE_THREAD)
     message(FATAL_ERROR "Sanitizers are mutually exclusive")
 endif ()
+
+# warning options
+option(LEARNLOG_BUILD_WARNING "Enable compiler warnings" OFF)
 
 # tls options
 option(LEARNLOG_USE_TLS "Use thread local storage" ON)
@@ -100,13 +100,13 @@ endforeach()
 # ---------------------------------------------------------------------------------------
 # Build binaries
 # ---------------------------------------------------------------------------------------
-if(LEARNLOG_BUILD_EXAMPLES)
+if(LEARNLOG_BUILD_EXAMPLE)
     message(STATUS "Generating example(s)")
     add_subdirectory(example)
     spdlog_enable_warnings(example)
 endif()
 
-if(LEARNLOG_BUILD_TESTS)
+if(LEARNLOG_BUILD_TEST)
     message(STATUS "Generating tests")
     enable_testing()
     add_subdirectory(tests)

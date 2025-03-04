@@ -127,7 +127,7 @@ void learnlog::async_helloworld() {
     //     10 * 1024,
     //     30
     // );
-    auto thread_pool = std::make_shared<learnlog::base::lockfree_thread_pool>(32768, 1);
+    auto thread_pool = std::make_shared<learnlog::base::lockfree_concurrent_thread_pool>(32768, 1);
     // learnlog::initialize_thread_pool<learnlog::base::lockfree_concurrent_thread_pool>(32768, 1);
     // auto thread_pool = learnlog::get_thread_pool();
     auto sink = std::make_shared<learnlog::sinks::basic_file_sink_mt>(fname, true);

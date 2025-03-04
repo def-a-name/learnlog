@@ -46,34 +46,25 @@ public:
 private:
     void sink_log_(const base::log_msg& msg) override {
         try {
-            if (auto tp_ptr = thread_pool_.lock()) {
-                tp_ptr->enqueue_log(shared_from_this(), msg);
-            }
-            else {
+            auto tp_ptr = thread_pool_.lock();
+            if (tp_ptr == nullptr) {
                 throw_learnlog_excpt(
                     "learnlog::async_logger: sink_log_() failed: thread pool does not exist");
             }
+            tp_ptr->enqueue_log(shared_from_this(), msg);
         }
         LEARNLOG_CATCH
     }
 
     void flush_sink_() override {
         try {
-            if (auto tp_ptr = thread_pool_.lock()) {
-                std::future<void> future = tp_ptr->enqueue_flush(shared_from_this());
-                try {
-                    future.get();
-                }
-                catch (const std::future_error&) {
-                    std::string err_str = 
-                        fmt::format("learnlog::async_logger [{}]: flush message was dropped", logger::name_);
-                    throw_learnlog_excpt(err_str);
-                }
-            }
-            else {
+            auto tp_ptr = thread_pool_.lock();
+            if (tp_ptr == nullptr) {
                 throw_learnlog_excpt(
                     "learnlog::async_logger: flush_sink_() failed: thread pool does not exist");
             }
+            std::future<void> future = tp_ptr->enqueue_flush(shared_from_this());
+            future.get();
         }
         LEARNLOG_CATCH
     }

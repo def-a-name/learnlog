@@ -122,7 +122,7 @@ size_t mpmc(q_type& q, size_t q_size,
     auto read_func = [&] {
         int item;
         while (true) {
-            if (q.dequeue_for(item, milliseconds(0))) {
+            if (q.dequeue_for(item, milliseconds(20))) {
                 REQUIRE(item == 2024);
                 dequeue_cnt++;
                 learnlog::base::os::sleep_for_ms(read_interval);

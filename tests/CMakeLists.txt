@@ -2,7 +2,6 @@ cmake_minimum_required(VERSION 3.11)
 project(learnlog_utests LANGUAGES CXX)
 
 if(NOT TARGET learnlog)
-    # Stand-alone build
     find_package(learnlog REQUIRED)
 endif()
 
@@ -69,7 +68,7 @@ function(learnlog_prepare_test test_target test_srcs learnlog_lib)
     spdlog_enable_warnings(${test_target})
 endfunction()
 
-if(LEARNLOG_BUILD_TESTS)
+if(LEARNLOG_BUILD_TEST)
     learnlog_prepare_test(learnlog-utests-base "${LEARNLOG_UTEST_BASE_SOURCES}" learnlog_base)
 
     learnlog_prepare_test(learnlog-utests-concurrentqueue "${LEARNLOG_UTEST_CONCURRENTQUEUE_SOURCES}" learnlog_base)
