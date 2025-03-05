@@ -80,11 +80,11 @@ int main(int argc, char *argv[]) {
             learnlog::info("~~~~~~~~~~~~~~~~~~~");
             learnlog::info("Iteration: {:d}", i);
             learnlog::info("~~~~~~~~~~~~~~~~~~~");
-            auto it = msg_fill_ratios.end() - 1;
+            auto it = msg_fill_ratios.rbegin();
             learnlog::info("-------------------------------------------------");
             learnlog::info("{:24s}|{:<8L}*{:<4d}|{:<8L}*{:<4d}|{:<8L}*{:<4d}|{:<8L}*{:<4d}|{:<8L}*{:<4d}",
                            "tp\\msg_num",
-                           q_size, *(it--), q_size, *(it--), q_size, *(it--), q_size, *(it--), q_size, *(it--));
+                           q_size, *(it++), q_size, *(it++), q_size, *(it++), q_size, *(it++), q_size, *(it++));
             learnlog::info("-------------------------------------------------");
             
             bench_msg<learnlog::base::lock_thread_pool>(q_size, msg_fill_ratios, pthread_num, cthread_num, "lock");
@@ -109,11 +109,11 @@ int main(int argc, char *argv[]) {
             learnlog::info("~~~~~~~~~~~~~~~~~~~");
             learnlog::info("Iteration: {}", i);
             learnlog::info("~~~~~~~~~~~~~~~~~~~");
-            auto it = pthread_nums.end() - 1;
+            auto it = pthread_nums.rbegin();
             learnlog::info("-------------------------------------------------");
             learnlog::info("{:24s}| {:<12d}| {:<12d}| {:<12d}| {:<12d}| {:<12d}",
                            "tp\\p_thd_num",
-                           *(it--), *(it--), *(it--), *(it--), *(it--));
+                           *(it++), *(it++), *(it++), *(it++), *(it++));
             learnlog::info("-------------------------------------------------");
 
             bench_pthread<learnlog::base::lock_thread_pool>(q_size, msg_num, pthread_nums, cthread_num, "lock");
@@ -138,11 +138,11 @@ int main(int argc, char *argv[]) {
             learnlog::info("~~~~~~~~~~~~~~~~~~~");
             learnlog::info("Iteration: {}", i);
             learnlog::info("~~~~~~~~~~~~~~~~~~~");
-            auto it = cthread_nums.end() - 1;
+            auto it = cthread_nums.rbegin();
             learnlog::info("-------------------------------------------------");
             learnlog::info("{:24s}| {:<12d}| {:<12d}| {:<12d}| {:<12d}| {:<12d}",
                            "tp\\c_thd_num",
-                           *(it--), *(it--), *(it--), *(it--), *(it--));
+                           *(it++), *(it++), *(it++), *(it++), *(it++));
             learnlog::info("-------------------------------------------------");
 
             bench_cthread<learnlog::base::lock_thread_pool>(q_size, msg_num, pthread_num, cthread_nums, "lock");
@@ -177,7 +177,7 @@ size_t bench_(size_t msg_num, learnlog::logger_shr_ptr logger, int pthread_num) 
     }
 
     auto delta = learnlog::sys_clock::now() - start_tp;
-    return msg_num * 1000000 / delta.count();
+    return msg_num * 1000000 / static_cast<size_t>(delta.count());
 }
 
 template <typename Threadpool>
