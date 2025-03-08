@@ -8,6 +8,7 @@
 #include "sync_factory.h"
 #include "async_factory.h"
 #include "base/exception.h"
+#include "version.h"
 
 namespace learnlog {
 
@@ -102,8 +103,8 @@ void flush_all();
 // 移除所有已注册的 logger
 void remove_all();
 
-// 初始化异步模式（async_logger）需要的线程池，
-// msg_queue_size 是日志消息缓冲区的大小，thread_num 是用于输出日志的线程数量，
+// 初始化一个新的线程池，
+// msg_queue_size 是日志消息缓冲区的大小，thread_num 是后台处理日志的线程数量，
 // 完成后自动调用 register_thread_pool() 注册
 template <typename Threadpool>
 void initialize_thread_pool(size_t msg_queue_size, size_t thread_num) {
@@ -111,7 +112,7 @@ void initialize_thread_pool(size_t msg_queue_size, size_t thread_num) {
                                                                   thread_num);
 }
 
-// 注册异步模式（async_logger）需要的线程池
+// 注册线程池
 void register_thread_pool(thread_pool_shr_ptr new_thread_pool);
 
 // 获取线程池的 shared_ptr
@@ -140,12 +141,28 @@ logger_shr_ptr create(std::string logger_name, SinkArgs &&...sink_args) {
                                          std::forward<SinkArgs>(sink_args)...);
 }
 
+// 通过 async_factory_lock 创建线程池为 lock_thread_pool 的 async_logger 对象，
+// 创建时需要指定 logger 使用的 sink、logger 的名称以及 sink 的创建参数
+// example:
+//  learnlog::create_async_lock<learnlog::sinks::basic_file_sink_mt>("logger_name",
+//                                                                   "filename");
+// 等同于:
+//  learnlog::basic_file_logger_mt<learnlog::async_factory>("logger_name", 
+//                                                          "filename");
 template <typename Sink, typename... SinkArgs>
-async_logger_shr_ptr create_async(std::string logger_name, SinkArgs &&...sink_args) {
-    return async_factory::create<Sink>(std::move(logger_name), 
-                                       std::forward<SinkArgs>(sink_args)...);
+async_logger_shr_ptr create_async_lock(std::string logger_name, SinkArgs &&...sink_args) {
+    return async_factory_lock::create<Sink>(std::move(logger_name), 
+                                            std::forward<SinkArgs>(sink_args)...);
 }
 
+// 通过 async_factory 创建线程池为 lockfree_thread_pool 的 async_logger 对象，
+// 创建时需要指定 logger 使用的 sink、logger 的名称以及 sink 的创建参数
+// example:
+//  learnlog::create_async_lockfree<learnlog::sinks::basic_file_sink_mt>("logger_name", 
+//                                                                       "filename");
+// 等同于:
+//  learnlog::basic_file_logger_mt<learnlog::async_factory_lockfree>("logger_name", 
+//                                                                   "filename");
 template <typename Sink, typename... SinkArgs>
 async_logger_shr_ptr create_async_lockfree(std::string logger_name, 
                                            SinkArgs &&...sink_args) {
@@ -153,6 +170,14 @@ async_logger_shr_ptr create_async_lockfree(std::string logger_name,
                                                 std::forward<SinkArgs>(sink_args)...);
 }
 
+// 通过 async_factory 创建线程池为 lockfree_concurrent_thread_pool 的 async_logger 对象，
+// 创建时需要指定 logger 使用的 sink、logger 的名称以及 sink 的创建参数
+// example:
+//  learnlog::create_async_lockfree_concurrent<learnlog::sinks::basic_file_sink_mt>("logger_name", 
+//                                                                                  "filename");
+// 等同于:
+//  learnlog::basic_file_logger_mt<learnlog::async_factory_lockfree_concurrent>("logger_name", 
+//                                                                              "filename");
 template <typename Sink, typename... SinkArgs>
 async_logger_shr_ptr create_async_lockfree_concurrent(std::string logger_name, 
                                                       SinkArgs &&...sink_args) {

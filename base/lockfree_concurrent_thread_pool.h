@@ -11,6 +11,12 @@ namespace base {
     static thread_local size_t p_token_idx_ = SIZE_MAX;
 #endif
 
+// 使用无锁队列 ConcurrentQueue 的线程池，处理 async_msg，
+// 循环尝试 q.try_enqueue() 入队，
+// 循环尝试 q.try_dequeue_from_producer() 出队，
+// 如果在队列占用空间不变的条件下入队失败，会额外申请一块内存后再次尝试，
+// 队列的总占用空间只增不减
+
 class lockfree_concurrent_thread_pool final: public thread_pool {
 public:
     using p_token_uni_ptr = std::unique_ptr<moodycamel::ProducerToken>;

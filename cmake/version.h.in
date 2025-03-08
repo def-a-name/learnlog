@@ -1,0 +1,4 @@
+// learnlog version
+#define LEARNLOG_VERSION_MAJOR @learnlog_VERSION_MAJOR@
+#define LEARNLOG_VERSION_MINOR @learnlog_VERSION_MINOR@
+#define LEARNLOG_VERSION_PATCH @learnlog_VERSION_PATCH@

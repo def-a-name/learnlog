@@ -189,7 +189,7 @@ registry& registry::instance() {
 registry::registry() 
     : global_formatter_(learnlog::make_unique<sinks::pattern_formatter>()) {
     sink_shr_ptr default_sink = std::make_shared<sinks::stdout_color_sink_mt>();
-    std::string default_logger_name = "";
+    std::string default_logger_name = "default_logger";
     default_logger_ = std::make_shared<logger>(default_logger_name, default_sink);
     loggers_[default_logger_name] = default_logger_;
 }

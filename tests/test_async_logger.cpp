@@ -174,11 +174,11 @@ TEST_CASE("create_from_registry", "[interface]") {
                                                                        thread_num);
     learnlog::set_global_pattern("[%n] %v");
     
-    learnlog::create_async<learnlog::sinks::test_sink_mt>("logger1");
+    learnlog::create_async_lock<learnlog::sinks::test_sink_mt>("logger1");
     auto sink1 = std::static_pointer_cast<learnlog::sinks::test_sink_mt>(
         learnlog::get_logger("logger1")->sinks()[0]
     );
-    learnlog::create_async<learnlog::sinks::test_sink_mt>("logger2");
+    learnlog::create_async_lock<learnlog::sinks::test_sink_mt>("logger2");
     auto sink2 = std::static_pointer_cast<learnlog::sinks::test_sink_mt>(
         learnlog::get_logger("logger2")->sinks()[0]
     );
@@ -205,7 +205,7 @@ TEST_CASE("create_from_registry", "[interface]") {
 }
 
 TEST_CASE("flush_every", "[interface]") {
-    learnlog::create_async<learnlog::sinks::test_sink_mt>("flush logger");
+    learnlog::create_async_lock<learnlog::sinks::test_sink_mt>("flush logger");
     auto sink = std::static_pointer_cast<learnlog::sinks::test_sink_mt>(
         learnlog::get_logger("flush logger")->sinks()[0]
     );

@@ -7,6 +7,7 @@ void bench_msg(int q_size,
                const std::vector<int>& msg_ratios,
                int pthread_num,
                int cthread_num,
+               const std::string& filename,
                std::string&& logger_name);
 
 template <typename Threadpool>
@@ -14,6 +15,7 @@ void bench_pthread(int q_size,
                    size_t msg_num,
                    const std::vector<int>& pthread_nums,
                    int cthread_num,
+                   const std::string& filename,
                    std::string&& logger_name);
 
 template <typename Threadpool>
@@ -21,12 +23,13 @@ void bench_cthread(int q_size,
                    size_t msg_num,
                    int pthread_num,
                    const std::vector<int>& cthread_nums,
+                   const std::string& filename,
                    std::string&& logger_name);
 
 int main(int argc, char *argv[]) {
     int q_size = 8192;
     int iters = 3;
-    int msg_num = 819200;
+    int msg_num = 1000000;
     int pthread_num = 8;
     int cthread_num = 8;
 
@@ -40,7 +43,6 @@ int main(int argc, char *argv[]) {
                 learnlog::warn("Message queue size should be at least 512 !");
                 q_size = 512;
             }
-            msg_num = q_size * 100;
         }
         if (argc > 2) {
             iters = atoi(argv[2]);
@@ -63,6 +65,11 @@ int main(int argc, char *argv[]) {
         std::vector<int> msg_fill_ratios{1, 4, 16, 64, 256};
         std::vector<int> pthread_nums{1, 2, 4, 6, 8};
         std::vector<int> cthread_nums{1, 2, 4, 6, 8};
+#ifdef _WIN32
+        learnlog::filename_t fname = L"bench_tmp/async_thread_pool.log";
+#else
+        learnlog::filename_t fname = "bench_tmp/async_thread_pool.log";
+#endif
 
         learnlog::info("*********************************");
         learnlog::info("Change total messages count (throughput | msg/ms)");
@@ -80,16 +87,16 @@ int main(int argc, char *argv[]) {
             learnlog::info("~~~~~~~~~~~~~~~~~~~");
             learnlog::info("Iteration: {:d}", i);
             learnlog::info("~~~~~~~~~~~~~~~~~~~");
-            auto it = msg_fill_ratios.end() - 1;
+            auto it = msg_fill_ratios.rbegin();
             learnlog::info("-------------------------------------------------");
             learnlog::info("{:24s}|{:<8L}*{:<4d}|{:<8L}*{:<4d}|{:<8L}*{:<4d}|{:<8L}*{:<4d}|{:<8L}*{:<4d}",
                            "tp\\msg_num",
-                           q_size, *(it--), q_size, *(it--), q_size, *(it--), q_size, *(it--), q_size, *(it--));
+                           q_size, *(it++), q_size, *(it++), q_size, *(it++), q_size, *(it++), q_size, *(it++));
             learnlog::info("-------------------------------------------------");
             
-            bench_msg<learnlog::base::lock_thread_pool>(q_size, msg_fill_ratios, pthread_num, cthread_num, "lock");
-            bench_msg<learnlog::base::lockfree_thread_pool>(q_size, msg_fill_ratios, pthread_num, cthread_num, "lockfree");
-            bench_msg<learnlog::base::lockfree_concurrent_thread_pool>(q_size, msg_fill_ratios, pthread_num, cthread_num, "lockfree_concurrent");
+            bench_msg<learnlog::base::lock_thread_pool>(q_size, msg_fill_ratios, pthread_num, cthread_num, fname, "lock");
+            bench_msg<learnlog::base::lockfree_thread_pool>(q_size, msg_fill_ratios, pthread_num, cthread_num, fname, "lockfree");
+            bench_msg<learnlog::base::lockfree_concurrent_thread_pool>(q_size, msg_fill_ratios, pthread_num, cthread_num, fname, "lockfree_concurrent");
         }
 
         learnlog::debug("\n");
@@ -109,16 +116,16 @@ int main(int argc, char *argv[]) {
             learnlog::info("~~~~~~~~~~~~~~~~~~~");
             learnlog::info("Iteration: {}", i);
             learnlog::info("~~~~~~~~~~~~~~~~~~~");
-            auto it = pthread_nums.end() - 1;
+            auto it = pthread_nums.rbegin();
             learnlog::info("-------------------------------------------------");
             learnlog::info("{:24s}| {:<12d}| {:<12d}| {:<12d}| {:<12d}| {:<12d}",
                            "tp\\p_thd_num",
-                           *(it--), *(it--), *(it--), *(it--), *(it--));
+                           *(it++), *(it++), *(it++), *(it++), *(it++));
             learnlog::info("-------------------------------------------------");
 
-            bench_pthread<learnlog::base::lock_thread_pool>(q_size, msg_num, pthread_nums, cthread_num, "lock");
-            bench_pthread<learnlog::base::lockfree_thread_pool>(q_size, msg_num, pthread_nums, cthread_num, "lockfree");
-            bench_pthread<learnlog::base::lockfree_concurrent_thread_pool>(q_size, msg_num, pthread_nums, cthread_num, "lockfree_concurrent");
+            bench_pthread<learnlog::base::lock_thread_pool>(q_size, msg_num, pthread_nums, cthread_num, fname, "lock");
+            bench_pthread<learnlog::base::lockfree_thread_pool>(q_size, msg_num, pthread_nums, cthread_num, fname, "lockfree");
+            bench_pthread<learnlog::base::lockfree_concurrent_thread_pool>(q_size, msg_num, pthread_nums, cthread_num, fname, "lockfree_concurrent");
         }
 
         learnlog::debug("\n");
@@ -138,16 +145,16 @@ int main(int argc, char *argv[]) {
             learnlog::info("~~~~~~~~~~~~~~~~~~~");
             learnlog::info("Iteration: {}", i);
             learnlog::info("~~~~~~~~~~~~~~~~~~~");
-            auto it = cthread_nums.end() - 1;
+            auto it = cthread_nums.rbegin();
             learnlog::info("-------------------------------------------------");
             learnlog::info("{:24s}| {:<12d}| {:<12d}| {:<12d}| {:<12d}| {:<12d}",
                            "tp\\c_thd_num",
-                           *(it--), *(it--), *(it--), *(it--), *(it--));
+                           *(it++), *(it++), *(it++), *(it++), *(it++));
             learnlog::info("-------------------------------------------------");
 
-            bench_cthread<learnlog::base::lock_thread_pool>(q_size, msg_num, pthread_num, cthread_nums, "lock");
-            bench_cthread<learnlog::base::lockfree_thread_pool>(q_size, msg_num, pthread_num, cthread_nums, "lockfree");
-            bench_cthread<learnlog::base::lockfree_concurrent_thread_pool>(q_size, msg_num, pthread_num, cthread_nums, "lockfree_concurrent");
+            bench_cthread<learnlog::base::lock_thread_pool>(q_size, msg_num, pthread_num, cthread_nums, fname, "lock");
+            bench_cthread<learnlog::base::lockfree_thread_pool>(q_size, msg_num, pthread_num, cthread_nums, fname, "lockfree");
+            bench_cthread<learnlog::base::lockfree_concurrent_thread_pool>(q_size, msg_num, pthread_num, cthread_nums, fname, "lockfree_concurrent");
         }
     }
     LEARNLOG_CATCH
@@ -185,14 +192,10 @@ void bench_msg(int q_size,
                const std::vector<int>& msg_ratios,
                int pthread_num,
                int cthread_num,
+               const std::string& filename,
                std::string&& logger_name) {
-#ifdef _WIN32
-    learnlog::filename_t fname = L"bench_tmp/async_thread_pool.log";
-#else
-    learnlog::filename_t fname = "bench_tmp/async_thread_pool.log";
-#endif
     auto tp = std::make_shared<Threadpool>(q_size, cthread_num);
-    auto sink = std::make_shared<learnlog::sinks::basic_file_sink_mt>(fname, true);
+    auto sink = std::make_shared<learnlog::sinks::basic_file_sink_mt>(filename, true);
     auto logger = std::make_shared<learnlog::async_logger>( logger_name,
                                                             std::move(sink),
                                                             std::move(tp));
@@ -215,14 +218,10 @@ void bench_pthread(int q_size,
                    size_t msg_num,
                    const std::vector<int>& pthread_nums,
                    int cthread_num,
+                   const std::string& filename,
                    std::string&& logger_name) {
-#ifdef _WIN32
-    learnlog::filename_t fname = L"bench_tmp/async_thread_pool.log";
-#else
-    learnlog::filename_t fname = "bench_tmp/async_thread_pool.log";
-#endif
     auto tp = std::make_shared<Threadpool>(q_size, cthread_num);
-    auto sink = std::make_shared<learnlog::sinks::basic_file_sink_mt>(fname, true);
+    auto sink = std::make_shared<learnlog::sinks::basic_file_sink_mt>(filename, true);
     auto logger = std::make_shared<learnlog::async_logger>( logger_name,
                                                             std::move(sink),
                                                             std::move(tp));
@@ -245,17 +244,12 @@ void bench_cthread(int q_size,
                    size_t msg_num,
                    int pthread_num,
                    const std::vector<int>& cthread_nums,
+                   const std::string& filename,
                    std::string&& logger_name) {
-#ifdef _WIN32
-    learnlog::filename_t fname = L"bench_tmp/async_thread_pool.log";
-#else
-    learnlog::filename_t fname = "bench_tmp/async_thread_pool.log";
-#endif
-
     std::vector<size_t> throughputs;
     for (auto &thread_num : cthread_nums) {
         auto tp = std::make_shared<Threadpool>(q_size, thread_num);
-        auto sink = std::make_shared<learnlog::sinks::basic_file_sink_mt>(fname, true);
+        auto sink = std::make_shared<learnlog::sinks::basic_file_sink_mt>(filename, true);
         auto logger = std::make_shared<learnlog::async_logger>(logger_name, 
                                                                std::move(sink), 
                                                                std::move(tp));
