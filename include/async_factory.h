@@ -45,7 +45,7 @@ struct async_factory_template {
     }
 };
 
-using async_factory = async_factory_template<base::lock_thread_pool>;
+using async_factory_lock = async_factory_template<base::lock_thread_pool>;
 using async_factory_lockfree = async_factory_template<base::lockfree_thread_pool>;
 using async_factory_lockfree_concurrent = async_factory_template<base::lockfree_concurrent_thread_pool>;
 

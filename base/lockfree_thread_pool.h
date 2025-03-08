@@ -11,6 +11,10 @@ namespace base {
     static thread_local std::unique_ptr<moodycamel::ConsumerToken> c_token_ = nullptr;
 #endif
 
+// 使用无锁阻塞队列 BlockingConcurrentQueue 的线程池，处理 async_msg，
+// 循环尝试 q.try_enqueue() 入队，阻塞等待 q.wait_dequeue() 出队，
+// 队列的总占用空间不变，初始化后不再额外申请内存
+
 class lockfree_thread_pool final: public thread_pool {
 public:
     using c_token_uni_ptr = std::unique_ptr<moodycamel::ConsumerToken>;

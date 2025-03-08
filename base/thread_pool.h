@@ -9,7 +9,7 @@
 namespace learnlog {
 namespace base {
 
-static const size_t default_queue_size = 32768;
+static const size_t default_queue_size = 8192;
 static const size_t default_threads_num = 1;
 
 enum msg_queue_type { lock, lockfree, lockfree_concurrent };

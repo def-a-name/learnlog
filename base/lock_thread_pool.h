@@ -7,6 +7,10 @@
 namespace learnlog {
 namespace base {
 
+// 使用阻塞队列 block_queue 的线程池，处理 async_msg，
+// q.enqueue() 入队，q.dequeue() 出队
+// 队列的总占用空间不变
+
 class lock_thread_pool final: public thread_pool {
 public:
     lock_thread_pool(size_t queue_size, size_t threads_num, 

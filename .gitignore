@@ -3,6 +3,7 @@
 [Rr]elease/
 build/*
 *.o
+include/version.h
 
 # 动态链接库
 *.so
