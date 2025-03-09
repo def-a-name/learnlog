@@ -2,7 +2,7 @@
 
 #ifdef LEARNLOG_USE_TLS
     #if (defined(_MSC_VER) && _MSC_VER < 1900) || (defined(__MINGW32__) || defined(__MINGW64__) && defined(__WINPTHREADS_VERSION)) || (defined(__GNUC__) && __GNUC__ <= 4)
-        #define LEARNLOG_USE_TLS 0
+        #undef LEARNLOG_USE_TLS
     #endif
 #endif
 

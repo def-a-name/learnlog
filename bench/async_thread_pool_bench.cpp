@@ -7,7 +7,7 @@ void bench_msg(int q_size,
                const std::vector<int>& msg_ratios,
                int pthread_num,
                int cthread_num,
-               const std::string& filename,
+               const learnlog::filename_t& filename,
                std::string&& logger_name);
 
 template <typename Threadpool>
@@ -15,7 +15,7 @@ void bench_pthread(int q_size,
                    size_t msg_num,
                    const std::vector<int>& pthread_nums,
                    int cthread_num,
-                   const std::string& filename,
+                   const learnlog::filename_t& filename,
                    std::string&& logger_name);
 
 template <typename Threadpool>
@@ -23,7 +23,7 @@ void bench_cthread(int q_size,
                    size_t msg_num,
                    int pthread_num,
                    const std::vector<int>& cthread_nums,
-                   const std::string& filename,
+                   const learnlog::filename_t& filename,
                    std::string&& logger_name);
 
 int main(int argc, char *argv[]) {
@@ -192,17 +192,17 @@ void bench_msg(int q_size,
                const std::vector<int>& msg_ratios,
                int pthread_num,
                int cthread_num,
-               const std::string& filename,
+               const learnlog::filename_t& filename,
                std::string&& logger_name) {
-    auto tp = std::make_shared<Threadpool>(q_size, cthread_num);
-    auto sink = std::make_shared<learnlog::sinks::basic_file_sink_mt>(filename, true);
-    auto logger = std::make_shared<learnlog::async_logger>( logger_name,
-                                                            std::move(sink),
-                                                            std::move(tp));
-    logger->set_pattern("[%n]: %v");
     std::vector<size_t> throughputs;
     for (auto &fill_ratio : msg_ratios) {
-        throughputs.push_back(bench_(q_size * fill_ratio, logger, pthread_num));
+        auto tp = std::make_shared<Threadpool>(q_size, cthread_num);
+        auto sink = std::make_shared<learnlog::sinks::basic_file_sink_mt>(filename, true);
+        auto logger = std::make_shared<learnlog::async_logger>( logger_name,
+                                                                std::move(sink),
+                                                                std::move(tp));
+        logger->set_pattern("[%n]: %v");
+        throughputs.push_back(bench_(q_size * fill_ratio, std::move(logger), pthread_num));
     }
     learnlog::info( "{:24s}| {:<12L}| {:<12L}| {:<12L}| {:<12L}| {:<12L}",
                     std::move(logger_name),
@@ -218,17 +218,17 @@ void bench_pthread(int q_size,
                    size_t msg_num,
                    const std::vector<int>& pthread_nums,
                    int cthread_num,
-                   const std::string& filename,
+                   const learnlog::filename_t& filename,
                    std::string&& logger_name) {
-    auto tp = std::make_shared<Threadpool>(q_size, cthread_num);
-    auto sink = std::make_shared<learnlog::sinks::basic_file_sink_mt>(filename, true);
-    auto logger = std::make_shared<learnlog::async_logger>( logger_name,
-                                                            std::move(sink),
-                                                            std::move(tp));
-    logger->set_pattern("[%n]: %v");
     std::vector<size_t> throughputs;
     for (auto &thread_num : pthread_nums) {
-        throughputs.push_back(bench_(msg_num, logger, thread_num));
+        auto tp = std::make_shared<Threadpool>(q_size, cthread_num);
+        auto sink = std::make_shared<learnlog::sinks::basic_file_sink_mt>(filename, true);
+        auto logger = std::make_shared<learnlog::async_logger>( logger_name,
+                                                                std::move(sink),
+                                                                std::move(tp));
+        logger->set_pattern("[%n]: %v");
+        throughputs.push_back(bench_(msg_num, std::move(logger), thread_num));
     }
     learnlog::info( "{:24s}| {:<12L}| {:<12L}| {:<12L}| {:<12L}| {:<12L}",
                     std::move(logger_name),
@@ -244,7 +244,7 @@ void bench_cthread(int q_size,
                    size_t msg_num,
                    int pthread_num,
                    const std::vector<int>& cthread_nums,
-                   const std::string& filename,
+                   const learnlog::filename_t& filename,
                    std::string&& logger_name) {
     std::vector<size_t> throughputs;
     for (auto &thread_num : cthread_nums) {

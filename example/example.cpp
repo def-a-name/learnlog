@@ -168,7 +168,7 @@ void async_mode() {
     learnlog::create_async_lock<learnlog::sinks::basic_file_sink_mt>("async_logger_2",
                                                                      fname,
                                                                      false);
-    learnlog::set_global_pattern("[%n] tid (%-5t): %v");
+    learnlog::set_global_pattern("[%n] tid (%-6t): %v");
     learnlog::exec_all([](learnlog::logger_shr_ptr l) {
         for (size_t i = 0; i < 10; i++) {
             l->info("msg #{} is displayed by lock_thread_pool", i);
@@ -212,7 +212,8 @@ void async_mode() {
         t.join();
     }
     async_logger_4->flush();
-    async_logger_4->info("Messages have been written to '{}' asynchronously", fname);
+    async_logger_4->info("Messages have been written to '{}' asynchronously", 
+                         learnlog::base::wstring_to_string(fname));
 
     learnlog::flush_every(learnlog::milliseconds(100));
 }
