@@ -121,7 +121,7 @@ void mpmc_concurrent_queue(concurrent_queue& q, size_t thread_enqueue_size,
                     continue;
             }
             ++enqueue_cnt;
-            learnlog::base::os::sleep_for_ms(write_interval_ms);
+            std::this_thread::sleep_for(learnlog::milliseconds(write_interval_ms));
         }
 
         if (enqueue_cnt.load() == enqueue_num) {
@@ -151,7 +151,7 @@ void mpmc_concurrent_queue(concurrent_queue& q, size_t thread_enqueue_size,
                     std::lock_guard<std::mutex> lock(dequeue_cnts_mutex);
                     ++dequeue_cnts[item];
                 }
-                learnlog::base::os::sleep_for_ms(read_interval_ms);
+                std::this_thread::sleep_for(learnlog::milliseconds(read_interval_ms));
             }
             else {
                 if (enqueue_finished.load()) break;
@@ -201,7 +201,7 @@ void mpmc_bind_concurrent_queue(concurrent_queue& q, size_t thread_enqueue_size,
             while (!q.try_enqueue(*p_token, std::move(i)))
                     continue;
             ++enqueue_cnt;
-            learnlog::base::os::sleep_for_ms(write_interval_ms);
+            std::this_thread::sleep_for(learnlog::milliseconds(write_interval_ms));
         }
 
         if (enqueue_cnt.load() == enqueue_num) {
@@ -224,7 +224,7 @@ void mpmc_bind_concurrent_queue(concurrent_queue& q, size_t thread_enqueue_size,
                     ++dequeue_cnts[item];
                 }
                 ++dequeue_cnt;
-                learnlog::base::os::sleep_for_ms(read_interval_ms);
+                std::this_thread::sleep_for(learnlog::milliseconds(read_interval_ms));
             }
             else {
                 if (dequeue_cnt.load() == enqueue_num) break;
@@ -266,7 +266,7 @@ void mpmc_block_concurrent_queue_notoken(block_concurrent_queue& q,
             while (!q.try_enqueue(std::move(i)))
                     continue;
             enqueue_cnt++;
-            learnlog::base::os::sleep_for_ms(write_interval_ms);
+            std::this_thread::sleep_for(learnlog::milliseconds(write_interval_ms));
         }
 
         if (enqueue_cnt.load() == enqueue_num) {
