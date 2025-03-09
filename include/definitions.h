@@ -11,7 +11,6 @@
 #else
     #include <fmt/format.h>
 #endif
-// #include "base/fmt/format.h"
 
 #include <chrono>
 #include <memory>
