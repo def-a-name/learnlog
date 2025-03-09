@@ -55,7 +55,6 @@ find_package(Threads REQUIRED)
 
 if (LEARNLOG_USE_BUNDLED_FMT)
     message(STATUS "Bundled version of fmt will be used.")
-    add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/base/fmt)
 else()
     find_package(fmt CONFIG)
     if(fmt_FOUND)
@@ -91,22 +90,22 @@ file(GLOB LEARNLOG_ROOT_SRCS "${LEARNLOG_SRCS_DIR}/*.cpp")
 
 add_library(learnlog STATIC ${LEARNLOG_ROOT_SRCS})
 add_library(learnlog::learnlog ALIAS learnlog)
-target_include_directories(learnlog PUBLIC 
-                            $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
-                            $<BUILD_INTERFACE:${LEARNLOG_HEADERS_DIR}>)
-target_link_libraries(learnlog PUBLIC fmt::fmt)
 target_link_libraries(learnlog PUBLIC learnlog_base learnlog_sinks)
+target_include_directories(learnlog PUBLIC 
+                           $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+                           $<BUILD_INTERFACE:${LEARNLOG_HEADERS_DIR}>)
 spdlog_enable_warnings(learnlog)
 
 # ---------------------------------------------------------------------------------------
 # Compile options
 # ---------------------------------------------------------------------------------------
-foreach(LEARNLOG_OPTION
-        LEARNLOG_USE_TLS)
-    if(${LEARNLOG_OPTION})
-        target_compile_definitions(learnlog PRIVATE ${LEARNLOG_OPTION})
-    endif()
-endforeach()
+# foreach(LEARNLOG_OPTION
+#         LEARNLOG_USE_TLS
+#         LEARNLOG_USE_BUNDLED_FMT)
+#     if(${LEARNLOG_OPTION})
+#         target_compile_definitions(learnlog PUBLIC ${LEARNLOG_OPTION})
+#     endif()
+# endforeach()
 
 # ---------------------------------------------------------------------------------------
 # Build binaries

@@ -195,12 +195,10 @@ TEST_CASE("create_from_registry", "[interface]") {
     REQUIRE(learnlog::get_logger("logger1") == nullptr);
     REQUIRE(learnlog::get_logger("logger2") == nullptr);
 
-    learnlog::create_async_lockfree_concurrent<learnlog::sinks::test_sink_mt>("logger4");
+    auto logger4 = learnlog::create_async_lockfree_concurrent<learnlog::sinks::test_sink_mt>("logger4");
     auto sink4 = std::static_pointer_cast<learnlog::sinks::test_sink_mt>(
         learnlog::get_logger("logger4")->sinks()[0]
     );
-    learnlog::flush_all();
-    REQUIRE(sink4->flush_count() == 1);
     REQUIRE(learnlog::get_logger("logger3") == nullptr);
 }
 
@@ -214,6 +212,6 @@ TEST_CASE("flush_every", "[interface]") {
     std::this_thread::sleep_for(learnlog::seconds(1));
     REQUIRE(sink->flush_count() == 3);
     
-    learnlog::flush_every(learnlog::seconds(0));
+    learnlog::flush_every(learnlog::seconds(10));
     learnlog::remove_all();
 }

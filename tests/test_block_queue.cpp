@@ -111,7 +111,7 @@ size_t mpmc(q_type& q, size_t q_size,
                     break;
             }
             enqueue_cnt++;
-            learnlog::base::os::sleep_for_ms(write_interval);
+            std::this_thread::sleep_for(learnlog::milliseconds(write_interval));
         }
         if (enqueue_cnt.load() == enqueue_num) {
             finished.store(true);
@@ -125,7 +125,7 @@ size_t mpmc(q_type& q, size_t q_size,
             if (q.dequeue_for(item, milliseconds(20))) {
                 REQUIRE(item == 2024);
                 dequeue_cnt++;
-                learnlog::base::os::sleep_for_ms(read_interval);
+                std::this_thread::sleep_for(learnlog::milliseconds(read_interval));
             }
             else {
                 if (finished.load()) break;

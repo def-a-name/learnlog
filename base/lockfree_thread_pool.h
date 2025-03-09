@@ -7,8 +7,10 @@
 namespace learnlog {
 namespace base {
 
+using c_token_uni_ptr = std::unique_ptr<moodycamel::ConsumerToken>;
+
 #ifdef LEARNLOG_USE_TLS
-    static thread_local std::unique_ptr<moodycamel::ConsumerToken> c_token_ = nullptr;
+    static thread_local c_token_uni_ptr c_token_ = nullptr;
 #endif
 
 // 使用无锁阻塞队列 BlockingConcurrentQueue 的线程池，处理 async_msg，
@@ -17,8 +19,6 @@ namespace base {
 
 class lockfree_thread_pool final: public thread_pool {
 public:
-    using c_token_uni_ptr = std::unique_ptr<moodycamel::ConsumerToken>;
-
     lockfree_thread_pool(size_t queue_size, size_t threads_num, 
                          const std::function<void()>& on_thread_start,
                          const std::function<void()>& on_thread_stop)
