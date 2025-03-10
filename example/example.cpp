@@ -212,8 +212,14 @@ void async_mode() {
         t.join();
     }
     async_logger_4->flush();
+#ifdef _WIN32
     async_logger_4->info("Messages have been written to '{}' asynchronously", 
                          learnlog::base::wstring_to_string(fname));
+#else
+    async_logger_4->info("Messages have been written to '{}' asynchronously", 
+                         fname);
+#endif
+    
 
     learnlog::flush_every(learnlog::milliseconds(100));
 }

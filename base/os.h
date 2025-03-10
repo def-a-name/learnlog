@@ -8,6 +8,7 @@
 #include <sys/stat.h>
 #include <thread>
 #include <ctime>
+#include <array>
 
 #ifdef _WIN32
     #include "win.h"
