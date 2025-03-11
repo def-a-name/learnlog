@@ -7,17 +7,29 @@
 namespace learnlog {
 namespace base {
 
-struct token_info {
-    const moodycamel::ProducerToken p_token;
-    std::atomic<bool> using_flag;
+struct atomic_token {
+    const moodycamel::ProducerToken p_token_;
+    std::atomic<bool> enqueuing_;
 
-    explicit token_info(moodycamel::ConcurrentQueue<async_msg>& msg_q) : 
-        p_token(msg_q), 
-        using_flag(false) {}
+    explicit atomic_token(moodycamel::ConcurrentQueue<async_msg>& msg_q)
+        : p_token_(msg_q),
+          enqueuing_(false) {}
+
+    void enqueue_lock() {
+        bool expected = false;
+        while (!enqueuing_.compare_exchange_weak(expected, true,
+                                             std::memory_order_relaxed)) {
+            expected = false;
+        }
+    }
+
+    void release() {
+        enqueuing_.store(false, std::memory_order_relaxed);
+    }
 };
 
 #ifdef LEARNLOG_USE_TLS
-    static thread_local token_info* t_info_ = nullptr;
+    static thread_local atomic_token* token_ = nullptr;
 #endif
 
 // 使用无锁队列 ConcurrentQueue 的线程池，处理 async_msg，
@@ -38,7 +50,7 @@ public:
                       on_thread_stop),
           msg_q_(msg_q_size_) {
         for (size_t i = 0; i < threads_num_; ++i) {
-            token_infos_.emplace_back(new token_info(msg_q_));
+            atomic_tokens_.emplace_back(new atomic_token(msg_q_));
         }
         for (size_t i = 0; i < threads_num_; ++i) {
             threads_.emplace_back([this] {
@@ -46,17 +58,17 @@ public:
                 producer_sema_.wait();
                 
                 size_t idx = consumer_cnt_.fetch_add(1, std::memory_order_relaxed);
-                token_info* t_info = nullptr;
+                atomic_token* token = nullptr;
                 {
-                    std::lock_guard<std::mutex> lock(ti_mutex_);
-                    t_info = token_infos_[idx];
+                    std::lock_guard<std::mutex> lock(t_mutex_);
+                    token = atomic_tokens_[idx];
                 }
 #ifdef LEARNLOG_USE_TLS
-                t_info_ = t_info;
+                token_ = token;
 #else
                 {
-                    std::lock_guard<std::mutex> lock(cti_mutex_);
-                    consumer_token_infos_[os::thread_id()] = t_info;
+                    std::lock_guard<std::mutex> lock(c_mutex_);
+                    consumer_atomic_tokens_[os::thread_id()] = token;
                 }
 #endif
                 this->thread_pool::worker_loop_();
@@ -74,7 +86,7 @@ public:
                       []{}),
           msg_q_(msg_q_size_) {
         for (size_t i = 0; i < threads_num_; ++i) {
-            token_infos_.emplace_back(new token_info(msg_q_));
+            atomic_tokens_.emplace_back(new atomic_token(msg_q_));
         }
         for (size_t i = 0; i < threads_num_; ++i) {
             threads_.emplace_back([this] {
@@ -82,17 +94,17 @@ public:
                 producer_sema_.wait();
                 
                 size_t idx = consumer_cnt_.fetch_add(1, std::memory_order_relaxed);
-                token_info* t_info = nullptr;
+                atomic_token* token = nullptr;
                 {
-                    std::lock_guard<std::mutex> lock(ti_mutex_);
-                    t_info = token_infos_[idx];
+                    std::lock_guard<std::mutex> lock(t_mutex_);
+                    token = atomic_tokens_[idx];
                 }
 #ifdef LEARNLOG_USE_TLS
-                t_info_ = t_info;
+                token_ = token;
 #else
                 {
-                    std::lock_guard<std::mutex> lock(cti_mutex_);
-                    consumer_token_infos_[os::thread_id()] = t_info;
+                    std::lock_guard<std::mutex> lock(c_mutex_);
+                    consumer_atomic_tokens_[os::thread_id()] = token;
                 }
 #endif
                 this->thread_pool::worker_loop_();
@@ -110,7 +122,7 @@ public:
                       []{}),
           msg_q_(msg_q_size_) {
         for (size_t i = 0; i < threads_num_; ++i) {
-            token_infos_.emplace_back(new token_info(msg_q_));
+            atomic_tokens_.emplace_back(new atomic_token(msg_q_));
         }
         for (size_t i = 0; i < threads_num_; ++i) {
             threads_.emplace_back([this] {
@@ -118,17 +130,17 @@ public:
                 producer_sema_.wait();
                 
                 size_t idx = consumer_cnt_.fetch_add(1, std::memory_order_relaxed);
-                token_info* t_info = nullptr;
+                atomic_token* token = nullptr;
                 {
-                    std::lock_guard<std::mutex> lock(ti_mutex_);
-                    t_info = token_infos_[idx];
+                    std::lock_guard<std::mutex> lock(t_mutex_);
+                    token = atomic_tokens_[idx];
                 }
 #ifdef LEARNLOG_USE_TLS
-                t_info_ = t_info;
+                token_ = token;
 #else
                 {
-                    std::lock_guard<std::mutex> lock(cti_mutex_);
-                    consumer_token_infos_[os::thread_id()] = t_info;
+                    std::lock_guard<std::mutex> lock(c_mutex_);
+                    consumer_atomic_tokens_[os::thread_id()] = token;
                 }
 #endif
                 this->thread_pool::worker_loop_();
@@ -138,17 +150,18 @@ public:
     }
 
     ~lockfree_concurrent_thread_pool() override {
-        for (auto &t_info : token_infos_) {
+        for (auto &token : atomic_tokens_) {
             producer_sema_.signal();
-            msg_q_.enqueue(t_info->p_token, async_msg(async_msg_type::terminate));
+            msg_q_.enqueue(token->p_token_,
+                           async_msg(async_msg_type::terminate));
         }
         try {
             for(auto &t : threads_){
                 t.join();
             }
-            for (auto &t_info : token_infos_) {
-                delete t_info;
-                t_info = nullptr;
+            for (auto &token : atomic_tokens_) {
+                delete token;
+                token = nullptr;
             }
         }
         catch(const std::exception& e) {
@@ -161,68 +174,55 @@ public:
 
 private:
     void enqueue_async_msg_(async_msg&& amsg) override {
-        token_info* t_info = nullptr;
+        atomic_token* token = nullptr;
 #ifdef LEARNLOG_USE_TLS
-        if (t_info_ == nullptr) {
+        if (token_ == nullptr) {
             size_t cnt = producer_cnt_.fetch_add(1, std::memory_order_relaxed);
             {
-                std::lock_guard<std::mutex> lock(ti_mutex_);
-                t_info_ = token_infos_[cnt % threads_num_];
+                std::lock_guard<std::mutex> lock(t_mutex_);
+                token_ = atomic_tokens_[cnt % threads_num_];
             }
             producer_sema_.signal();
         }
-        t_info = t_info_;
+        token = token_;
 #else
         size_t tid = os::thread_id();
         {
-            std::lock_guard<std::mutex> lock(pti_mutex_);
-            if (producer_token_infos_.find(tid) == producer_token_infos_.end()) {
+            std::lock_guard<std::mutex> lock(p_mutex_);
+            if (producer_atomic_tokens_.find(tid) == producer_atomic_tokens_.end()) {
                 size_t cnt = producer_cnt_.fetch_add(1, std::memory_order_relaxed);
                 {
-                    std::lock_guard<std::mutex> lock(ti_mutex_);
-                    t_info = token_infos_[cnt % threads_num_];
+                    std::lock_guard<std::mutex> lock(t_mutex_);
+                    token = atomic_tokens_[cnt % threads_num_];
                 }
-                producer_token_infos_[tid] = t_info;
+                producer_atomic_tokens_[tid] = token;
                 producer_sema_.signal();
             }
             else {
-                t_info = producer_token_infos_[tid];
+                token = producer_atomic_tokens_[tid];
             }
         }
 #endif
-        if (producer_cnt_.load(std::memory_order_relaxed) > threads_num_) {
-            bool expected = false;
-            while (!t_info->using_flag.compare_exchange_weak(expected, true,
-                                                             std::memory_order_relaxed)) {
-                expected = false;
-            }
-            while (!msg_q_.try_enqueue(t_info->p_token, std::move(amsg))) {
-                if (msg_q_.enqueue(t_info->p_token, std::move(amsg))) {
-                    break;
-                }
-            }
-            t_info->using_flag.store(false, std::memory_order_relaxed);
-        }
-        else {
-            while (!msg_q_.try_enqueue(t_info->p_token, std::move(amsg))) {
-                if (msg_q_.enqueue(t_info->p_token, std::move(amsg))) {
-                    break;
-                }
+        token->enqueue_lock();
+        while (!msg_q_.try_enqueue(token->p_token_, std::move(amsg))) {
+            if (msg_q_.enqueue(token->p_token_, std::move(amsg))) {
+                break;
             }
         }
+        token->release();
     }
 
     void dequeue_async_msg_(async_msg& amsg) override {
-        token_info* t_info = nullptr;
+        atomic_token* token = nullptr;
 #ifdef LEARNLOG_USE_TLS
-        t_info = t_info_;
+        token = token_;
 #else
         {
-            std::lock_guard<std::mutex> lock(cti_mutex_);
-            t_info = consumer_token_infos_[os::thread_id()];
+            std::lock_guard<std::mutex> lock(c_mutex_);
+            token = consumer_atomic_tokens_[os::thread_id()];
         }
 #endif
-        while (!msg_q_.try_dequeue_from_producer(t_info->p_token, amsg)) {
+        while (!msg_q_.try_dequeue_from_producer(token->p_token_, amsg)) {
             continue;
         }
     }
@@ -231,13 +231,13 @@ private:
     std::atomic<size_t> consumer_cnt_{0};
     moodycamel::LightweightSemaphore producer_sema_;
 
-    std::mutex ti_mutex_;
-    std::vector<token_info*> token_infos_;
+    std::mutex t_mutex_;
+    std::vector<atomic_token*> atomic_tokens_;
 #ifndef LEARNLOG_USE_TLS
-    std::mutex pti_mutex_;
-    std::unordered_map<size_t, token_info*> producer_token_infos_;
-    std::mutex cti_mutex_;
-    std::unordered_map<size_t, token_info*> consumer_token_infos_;
+    std::mutex p_mutex_;
+    std::unordered_map<size_t, atomic_token*> producer_atomic_tokens_;
+    std::mutex c_mutex_;
+    std::unordered_map<size_t, atomic_token*> consumer_atomic_tokens_;
 #endif
 
     moodycamel::ConcurrentQueue<async_msg> msg_q_;

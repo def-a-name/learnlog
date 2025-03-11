@@ -44,7 +44,7 @@ set(LEARNLOG_UTEST_SINKS_SOURCES
 )
 
 set(LEARNLOG_UTEST_INTERFACE_SOURCES
-    # test_interface.cpp
+    test_interface.cpp
     test_async_logger.cpp
 )
 
