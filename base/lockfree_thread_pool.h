@@ -3,15 +3,10 @@
 #include "base/thread_pool.h"
 #include "concurrentqueue/blockingconcurrentqueue.h"
 #include "async_logger.h"
+#include <unordered_map>
 
 namespace learnlog {
 namespace base {
-
-using c_token_uni_ptr = std::unique_ptr<moodycamel::ConsumerToken>;
-
-#ifdef LEARNLOG_USE_TLS
-    static thread_local c_token_uni_ptr c_token_ = nullptr;
-#endif
 
 // 使用无锁阻塞队列 BlockingConcurrentQueue 的线程池，处理 async_msg，
 // 循环尝试 q.try_enqueue() 入队，阻塞等待 q.wait_dequeue() 出队，
@@ -19,6 +14,8 @@ using c_token_uni_ptr = std::unique_ptr<moodycamel::ConsumerToken>;
 
 class lockfree_thread_pool final: public thread_pool {
 public:
+    using c_token_uni_ptr = std::unique_ptr<moodycamel::ConsumerToken>;
+
     lockfree_thread_pool(size_t queue_size, size_t threads_num, 
                          const std::function<void()>& on_thread_start,
                          const std::function<void()>& on_thread_stop)
@@ -28,7 +25,7 @@ public:
             threads_.emplace_back([this] {
                 start_func_();
 #ifdef LEARNLOG_USE_TLS
-                c_token_ = learnlog::make_unique<moodycamel::ConsumerToken>(msg_q_);
+                token_ = learnlog::make_unique<moodycamel::ConsumerToken>(msg_q_);
 #else
                 size_t tid = os::thread_id();
                 {
@@ -50,7 +47,7 @@ public:
             threads_.emplace_back([this] {
                 start_func_();
 #ifdef LEARNLOG_USE_TLS
-                c_token_ = learnlog::make_unique<moodycamel::ConsumerToken>(msg_q_);
+                token_ = learnlog::make_unique<moodycamel::ConsumerToken>(msg_q_);
 #else
                 size_t tid = os::thread_id();
                 {
@@ -72,7 +69,7 @@ public:
             threads_.emplace_back([this] {
                 start_func_();
 #ifdef LEARNLOG_USE_TLS
-                c_token_ = learnlog::make_unique<moodycamel::ConsumerToken>(msg_q_);
+                token_ = learnlog::make_unique<moodycamel::ConsumerToken>(msg_q_);
 #else
                 size_t tid = os::thread_id();
                 {
@@ -114,7 +111,7 @@ private:
 
     void dequeue_async_msg_(async_msg& amsg) override {
 #ifdef LEARNLOG_USE_TLS
-        msg_q_.wait_dequeue(*c_token_, amsg);
+        msg_q_.wait_dequeue(*token_, amsg);
 #else
         size_t tid = os::thread_id();
         moodycamel::ConsumerToken* token = nullptr;
@@ -126,7 +123,9 @@ private:
 #endif
     }
 
-#ifndef LEARNLOG_USE_TLS
+#ifdef LEARNLOG_USE_TLS
+    static thread_local c_token_uni_ptr token_;
+#else
     std::mutex hash_mutex_;
     std::unordered_map<size_t, c_token_uni_ptr> tokens_;
 #endif

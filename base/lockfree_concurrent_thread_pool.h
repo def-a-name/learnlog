@@ -3,6 +3,7 @@
 #include "base/thread_pool.h"
 #include "concurrentqueue/blockingconcurrentqueue.h"
 #include "async_logger.h"
+#include <unordered_map>
 
 namespace learnlog {
 namespace base {
@@ -27,10 +28,6 @@ struct atomic_token {
         enqueuing_.store(false, std::memory_order_relaxed);
     }
 };
-
-#ifdef LEARNLOG_USE_TLS
-    static thread_local atomic_token* token_ = nullptr;
-#endif
 
 // 使用无锁队列 ConcurrentQueue 的线程池，处理 async_msg，
 // 入队时先尝试 q.try_enqueue()，如果失败再尝试 q.enqueue()，以此循环
@@ -233,7 +230,9 @@ private:
 
     std::mutex t_mutex_;
     std::vector<atomic_token*> atomic_tokens_;
-#ifndef LEARNLOG_USE_TLS
+#ifdef LEARNLOG_USE_TLS
+    static thread_local atomic_token* token_;
+#else
     std::mutex p_mutex_;
     std::unordered_map<size_t, atomic_token*> producer_atomic_tokens_;
     std::mutex c_mutex_;

@@ -214,8 +214,14 @@ void mpmc_bind_concurrent_queue(concurrent_queue& q, size_t thread_enqueue_size,
     std::atomic<size_t> dequeue_cnt{0};
     std::atomic<size_t> p_tokens_idx{0};
     auto read_func = [&] {
-        auto p_token = p_tokens[p_tokens_idx.fetch_add(1, std::memory_order_relaxed)];
-
+        size_t idx = p_tokens_idx.fetch_add(1, std::memory_order_relaxed);
+        while (idx >= p_tokens.size()) {}
+        std::shared_ptr<moodycamel::ProducerToken> p_token;
+        {
+            std::lock_guard<std::mutex> lock(p_tokens_mutex);
+            p_token = p_tokens[idx];
+        }
+    
         int item;
         while (true) {
             if (q.try_dequeue_from_producer(*p_token, item)) {
