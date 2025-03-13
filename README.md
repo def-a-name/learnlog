@@ -18,7 +18,7 @@ $ cmake .. && cmake --build .
 
 ## Benchmarks
 
-benchmark 的编译方法：
+编译方法：
 
 ```console
 $ cd build
