@@ -20,8 +20,8 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
-# 'learnlog' is basically a partial reproduction of 'spdlog' (https://github.com/gabime/spdlog), 
-# the copyright and license of the original project are as follows
+# 'learnlog' originates from 'spdlog' (https://github.com/gabime/spdlog), 
+# the copyright and license of which are as follows
 
 The MIT License (MIT)
 
