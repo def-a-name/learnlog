@@ -41,15 +41,15 @@ int main(int argc, char *argv[]) {
         learnlog::info("multiple producers single consumer (throughput | msg/ms)");
         learnlog::info("*********************************");
         learnlog::debug("p_thd_cnt: produce_threads(writers) count");
-        learnlog::debug("q1: lock queue");
-        learnlog::debug("q2: concurrent queue (no token)");
-        learnlog::debug("q3: block concurrent queue (no token)");
-        learnlog::debug("q4: concurrent queue (enq:no_token; deq:consumer_token)");
-        learnlog::debug("q5: block concurrent queue (enq:no_token; deq:consumer_token)");
-        learnlog::debug("q6: concurrent queue (enq:producer_token; deq:consumer_token)");
-        learnlog::debug("q7: block concurrent queue (enq:producer_token; deq:consumer_token)");
-        learnlog::debug("q8: concurrent queue (enq:producer_token; deq:producer_token)");
-        learnlog::debug("q9: block concurrent queue (enq:producer_token; deq:no_token)");
+        learnlog::debug("q1: {:32s}", "block_queue");
+        learnlog::debug("q2: {:32s}(no token)", "ConcurrentQueue");
+        learnlog::debug("q3: {:32s}(no token)", "BlockingConcurrentQueue");
+        learnlog::debug("q4: {:32s}(enq:no_token; deq:consumer_token)", "ConcurrentQueue");
+        learnlog::debug("q5: {:32s}(enq:no_token; deq:consumer_token)", "BlockingConcurrentQueue");
+        learnlog::debug("q6: {:32s}(enq:producer_token; deq:consumer_token)", "ConcurrentQueue");
+        learnlog::debug("q7: {:32s}(enq:producer_token; deq:consumer_token)", "BlockingConcurrentQueue");
+        learnlog::debug("q8: {:32s}(enq:producer_token; deq:producer_token)", "ConcurrentQueue");
+        learnlog::debug("q9: {:32s}(enq:producer_token; deq:no_token)", "BlockingConcurrentQueue");
         learnlog::info("-------------------------------------------------");
         learnlog::info("{:12s}| {:12s}| {:12s}| {:12s}{:12s}| {:12s}{:12s}| {:12s}{:12s}| {:12s}{:12s}",
                        "p_thd_cnt", "msg_cnt",
@@ -84,15 +84,15 @@ int main(int argc, char *argv[]) {
         learnlog::info("messages count: {:L}*{:.2f}; produce threads count: {:L}", q_size, mpmc_msg_fill_rate, p_thread_cnt);
         learnlog::info("*********************************");
         learnlog::debug("c_thd_cnt: consume_threads(readers) count");
-        learnlog::debug("q1: lock queue");
-        learnlog::debug("q2: concurrent queue (no token)");
-        learnlog::debug("q3: block concurrent queue (no token)");
-        learnlog::debug("q4: concurrent queue (enq:no_token; deq:consumer_token)");
-        learnlog::debug("q5: block concurrent queue (enq:no_token; deq:consumer_token)");
-        learnlog::debug("q6: concurrent queue (enq:producer_token; deq:consumer_token)");
-        learnlog::debug("q7: block concurrent queue (enq:producer_token; deq:consumer_token)");
-        learnlog::debug("q8: concurrent queue (enq:producer_token; deq:producer_token)");
-        learnlog::debug("q9: block concurrent queue (enq:producer_token; deq:no_token)");
+        learnlog::debug("q1: {:32s}", "block_queue");
+        learnlog::debug("q2: {:32s}(no token)", "ConcurrentQueue");
+        learnlog::debug("q3: {:32s}(no token)", "BlockingConcurrentQueue");
+        learnlog::debug("q4: {:32s}(enq:no_token; deq:consumer_token)", "ConcurrentQueue");
+        learnlog::debug("q5: {:32s}(enq:no_token; deq:consumer_token)", "BlockingConcurrentQueue");
+        learnlog::debug("q6: {:32s}(enq:producer_token; deq:consumer_token)", "ConcurrentQueue");
+        learnlog::debug("q7: {:32s}(enq:producer_token; deq:consumer_token)", "BlockingConcurrentQueue");
+        learnlog::debug("q8: {:32s}(enq:producer_token; deq:producer_token)", "ConcurrentQueue");
+        learnlog::debug("q9: {:32s}(enq:producer_token; deq:no_token)", "BlockingConcurrentQueue");
         learnlog::info("-------------------------------------------------");
         learnlog::info("{:12s}| {:12s}| {:12s}{:12s}| {:12s}{:12s}| {:12s}{:12s}| {:12s}{:12s}",
                        "c_thd_cnt",
@@ -318,9 +318,10 @@ double bench_concurrent_q(int q_size,
 
         for (int i = 0; i < msg_num; i++) {
             item_t msg;
-            while (!q.try_enqueue(*p_token, std::move(msg)))
+            while (!q.try_enqueue(*p_token, std::move(msg))) {
                 if (q.enqueue(*p_token, std::move(msg)))
                     break;
+            }  
         }
     };
 
@@ -361,14 +362,14 @@ double bench_concurrent_q(int q_size,
                                    &dequeue_cnt,
                                    msg_cnt] {
         size_t idx = tokens_idx.fetch_add(1, std::memory_order_relaxed);
-        while (p_tokens.size() == 0) {
-            continue;
-        }
         std::shared_ptr<moodycamel::ProducerToken> p_token;
-        {
+        while (true) {
             std::lock_guard<std::mutex> lock(p_tokens_mutex);
-            idx = idx % p_tokens.size();
-            p_token = p_tokens[idx];
+            if (p_tokens.size() > 0) {
+                idx = idx % p_tokens.size();
+                p_token = p_tokens[idx];
+                break;
+            }
         }
 
         item_t msg;
