@@ -176,7 +176,7 @@ void async_mode() {
     });
     
     // 单例中只有一个线程池，使用相同线程池的 async_logger 可以共享，
-    // 但是如果要注册使用不同线程池的 async_logger，需要请求单例中所有 async_logger 在完成任务后销毁，然后
+    // 但是如果要注册使用不同线程池的 async_logger，单例中所有 async_logger 会完成任务后销毁，然后销毁线程池，再
     // 重新创建并注册一个新的线程池
     auto async_logger_3 = 
         learnlog::create_async_lockfree<learnlog::sinks::basic_file_sink_mt>("async_logger_3",
