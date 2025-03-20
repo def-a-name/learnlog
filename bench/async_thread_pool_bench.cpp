@@ -31,7 +31,7 @@ int main(int argc, char *argv[]) {
     int iters = 3;
     int msg_num = 1000000;
     int pthread_num = 8;
-    int cthread_num = 8;
+    int cthread_num = 1;
 
     try {
         learnlog::set_global_pattern("[%^%l%$] %v");
