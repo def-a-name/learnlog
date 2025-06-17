@@ -70,7 +70,7 @@ $ ./async_thread_pool_bench  # ./async_thread_pool_bench <queue_size> <iter_time
 ```
 
 > 测试结果表明：
-> - 在并发量大，资源争用明显的情况下`（写线程多于输出线程，短时间内日志入队请求大于队列总容量）`，`lockfree` 和 `lockfree_concurrent` 的处理速度是 `lock` 的 **至少 10 倍**；  
+> - 在并发量大，资源争用明显的情况下`（写线程多于输出线程，短时间内日志入队请求大于队列总容量）`，`lockfree` 和 `lockfree_concurrent` 的处理速度是 `lock` 的 **5~10 倍**；  
 > - 而随着 `后台输出线程` 的增加，`lockfree_concurrent` 在保证了 `线程内日志有序性` 的同时，处理速度稳步增长，显著快于 `lock` 和 `lockfree_concurrent`。
 
 `async_queue_bench` 测试了 [ConcurrentQueue](base/concurrentqueue/concurrentqueue.h) 和 [BlockingConcurrentQueue](base/concurrentqueue/blockingconcurrentqueue.h) 在不同的 入队/出队 方法组合下的理论速度（仅将空日志入队/出队，不做中间处理），同时也加入了 [block_queue](base/concurrentqueue/block_queue.h) 进行对比：
